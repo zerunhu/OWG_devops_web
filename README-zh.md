@@ -2,9 +2,6 @@
 
 > 这是一个极简的 vue admin 管理后台。它只包含了 Element UI & axios & iconfont & permission control & lint，这些搭建后台必要的东西。
 
-[线上地址](http://panjiachen.github.io/vue-admin-template)
-
-[国内访问](https://panjiachen.gitee.io/vue-admin-template)
 
 目前版本为 `v4.0+` 基于 `vue-cli` 进行构建，若你想使用旧版本，可以切换分支到[tag/3.11.0](https://github.com/PanJiaChen/vue-admin-template/tree/tag/3.11.0)，它不依赖 `vue-cli`。
 
@@ -12,20 +9,6 @@
 
 如果你想要根据用户角色来动态生成侧边栏和 router，你可以使用该分支[permission-control](https://github.com/PanJiaChen/vue-admin-template/tree/permission-control)
 
-## GitAds
-
-[<img src="https://images.gitads.io/PanJiaChen/vue-admin-template" alt="GitAds" />](https://tracking.gitads.io/?repo=PanJiaChen/vue-admin-template)
-
-
-## 相关项目
-
-- [vue-element-admin](https://github.com/PanJiaChen/vue-element-admin)
-
-- [electron-vue-admin](https://github.com/PanJiaChen/electron-vue-admin)
-
-- [vue-typescript-admin-template](https://github.com/Armour/vue-typescript-admin-template)
-
-- [awesome-project](https://github.com/PanJiaChen/vue-element-admin/issues/2312)
 
 写了一个系列的教程配套文章，如何从零构建后一个完整的后台项目:
 
@@ -39,7 +22,7 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/PanJiaChen/vue-admin-template.git
+git clone https://github.com/huzerun0306/vue-admin-template.git
 
 # 进入项目目录
 cd vue-admin-template
@@ -104,4 +87,4 @@ Modern browsers and Internet Explorer 10+.
 
 [MIT](https://github.com/PanJiaChen/vue-admin-template/blob/master/LICENSE) license.
 
-Copyright (c) 2017-present PanJiaChen
+Copyright (c) 2020-present HuZeRun
