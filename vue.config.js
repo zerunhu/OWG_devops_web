@@ -47,7 +47,8 @@ module.exports = {
       // }
       // ,
       "/api":{
-        target: 'http://127.0.0.1:8001',
+        // target: 'http://127.0.0.1:8001',
+        target: 'http://172.20.1.60:8000',
         changeOrigin: true,
         // pathRewrite: {
         //   ['^' + process.env.VUE_APP_BASE_API]: ''

@@ -36,13 +36,11 @@ export const constantRoutes = [
     component: () => import('@/views/login/index'),
     hidden: true
   },
-
   {
     path: '/404',
     component: () => import('@/views/404'),
     hidden: true
   },
-
   {
     path: '/',
     component: Layout,
@@ -174,16 +172,14 @@ export const constantRoutes = [
     ]
   },
 
-
-
   // 404 page must be placed at the end !!!
-  { path: '*', redirect: '/404', hidden: true }
+  // { path: '*', redirect: '/404', hidden: true }
 ]
 
 export const asyncRouterMap = [
   {
     path: '/permission',
-    component: () => import('@/views/nested/menu3/menu1-detail'),
+    component: Layout,
     name: '权限测试',
     alwaysShow: true,
     meta: { roles: ['admin','huzerun'] , title: "permission", icon: 'test' }, //页面需要的权限
@@ -195,7 +191,67 @@ export const asyncRouterMap = [
       meta: { roles: ['admin','huzerun'] , title: "index" }  //页面需要的权限
     }]
   },
-  // { path: '*', redirect: '/404', hidden: true }
+  {
+    path: '/Continuousintegration',
+    component: Layout,
+    name: '权限测试',
+    alwaysShow: true,
+    meta: { roles: ['admin','huzerun'] , title: "ContinueIntegra", icon: 'ci' }, //页面需要的权限
+    children: [
+    { 
+      path: 'svn',
+      component: () => import('@/views/ci/svn/'),
+      name: 'svn测试页面',
+      meta: { roles: ['admin','huzerun'] , title: "svn" }  
+    },
+    { 
+      path: 'cicontainers',
+      component: () => import('@/views/ci/cicontainers/'),
+      name: '创建ci_container界面',
+      meta: { roles: ['admin','huzerun'] , title: "cicontainers" }  
+    },
+    { 
+      path: 'ecr',
+      component: () => import('@/views/ci/ecr/'),
+      name: 'ecr信息',
+      meta: { roles: ['admin','huzerun'] , title: "ecr" }  
+    },
+    { 
+      path: 'file/:id(\\d+)',
+      component: () => import('@/views/ci/example/edit'),
+      name: 'file信息',
+      meta: { roles: ['admin','huzerun'] , title: "File" },
+      hidden: true
+    },
+    {
+      path: 'list',
+      component: () => import('@/views/ci/example/list'),
+      name: 'ArticleList',
+      meta: { title: 'Article List' }
+    }
+    // {
+    // path: '/example',
+    // component: Layout,
+    // redirect: '/example/list',
+    // name: 'Example',
+    // meta: {
+    //   title: 'Example',
+    //   icon: 'el-icon-s-help'
+    // },
+    // // children: [
+    //   {
+    //     path: 'edit/:id(\\d+)',
+    //     component: () => import('@/views/ci/example/edit'),
+    //     name: 'EditArticle',
+    //     meta: { title: 'Edit Article', noCache: true, activeMenu: '/example/list' },
+    //     hidden: true
+    //   },
+    // ]
+  // },
+
+    ]
+  },
+  { path: '*', redirect: '/404', hidden: true }
 ];
 
 
@@ -207,7 +263,6 @@ const createRouter = () => new Router({
 
 const router = createRouter()
 
-// Detail see: https://github.com/vuejs/vue-router/issues/1234#issuecomment-357941465
 export function resetRouter() {
   const newRouter = createRouter()
   router.matcher = newRouter.matcher // reset router

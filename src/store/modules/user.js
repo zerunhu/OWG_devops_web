@@ -1,7 +1,7 @@
-import { login, logout, getInfo } from '@/api/user'
+import { login, getInfo } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { resetRouter } from '@/router'
-import axios from 'axios';
+
 const getDefaultState = () => {
   return {
     token: getToken(),
@@ -23,9 +23,6 @@ const mutations = {
   SET_NAME: (state, name) => {
     state.name = name
   },
-  SET_AVATAR: (state, avatar) => {
-    state.avatar = avatar
-  },
   SET_ROLES: (state, roles) => {
     state.roles = roles
   }
@@ -37,8 +34,7 @@ const actions = {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
-        // axios.post('/api/login', { username: username.trim(), password: password }).then(response => { 
-        const { data } = response
+        const data = response
         commit('SET_TOKEN', data.token)
         setToken(data.token)
         resolve()
@@ -51,14 +47,13 @@ const actions = {
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      // axios.post('/api/user/info', "token="+state.token ).then(response => {
       getInfo(state.token).then(response => {
-        const { data } = response
+        const data = response
         if (!data) {
           return reject('Verification failed, please Login again.')
         }
-        const { name, roles } = data
-        commit('SET_NAME', name)
+        const { user_name, roles } = data
+        commit('SET_NAME', user_name)
         commit('SET_ROLES', roles)
         // commit('SET_AVATAR', avatar)
         resolve(data)
@@ -72,13 +67,13 @@ const actions = {
   logout({ commit, state }) {
     return new Promise((resolve, reject) => {
       // logout(state.token).then(() => {
-        removeToken() // must remove  token  first
-        resetRouter()
-        // commit('RESET_STATE')
-        commit('SET_ROLES', [])
-        resolve()
+      removeToken() // must remove  token  first
+      resetRouter()
+      // commit('RESET_STATE')
+      commit('SET_ROLES', [])
+      resolve()
       // }).catch(error => {
-        // reject(error)
+      // reject(error)
       // })
     })
   },

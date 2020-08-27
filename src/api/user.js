@@ -1,7 +1,6 @@
 import request from '@/utils/request'
-import axios from 'axios';
 export function login(data) {
-  return axios({
+  return request({
     url: '/api/login',
     method: 'post',
     data
@@ -9,7 +8,7 @@ export function login(data) {
 }
 
 export function getInfo(token) {
-  return axios({
+  return request({
     url: '/api/user/info',
     method: 'get',
     params: { token: token }
