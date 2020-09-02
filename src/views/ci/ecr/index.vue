@@ -1,36 +1,34 @@
 <template>
-  <div class="home move" >
-    <el-row display="margin-top:10px">
-      <el-select v-model="value" placeholder="请选择镜像名称">
+  <div class="app-container" >
+    <el-row>
+      <el-select v-model="value" placeholder="请选择应用名称" @change="GetEcrTags()">
         <el-option
           v-for="item in ImageList"
-          :key="item.value"
-          :label="item.value"
-          :value="item.value">
+          :key="item"
+          :label="item"
+          :value="item">
         </el-option>
       </el-select>
-      <el-button type="primary" @click="GetEcrTags()" :loading=isloading style="margin-left:10px">查询版本</el-button>
+      <!-- <el-button type="primary" @click="GetEcrTags()" :loading=isloading style="margin-left:10px">查询版本</el-button> -->
     </el-row>
 
-    <el-row>
-        <el-table :data="TagList" style="width: 100%" >
-          <el-table-column label="镜像名称" min-width="50">
+    <el-row style="margin-top: 10px">
+        <el-table :data="TagList" border fit highlight-current-row  style="width: 100%" >
+          <el-table-column label="镜像名称" align="center" width="240">
             <template > {{ value }} </template>
           </el-table-column>
-          <el-table-column label="tag" min-width="50">
+          <el-table-column label="tag" align="center" width="200">
             <template slot-scope="scope"> {{ scope.row.tag }} </template>
           </el-table-column>
-          <el-table-column label="创建时间" min-width="50">
+          <el-table-column label="创建时间" align="center" width="360">
             <template slot-scope="scope"> {{ scope.row.create_time }}</template>
           </el-table-column>
-          <el-table-column label="作者" min-width="50">
-            <template slot-scope="scope"> {{ scope.row.auther }}</template>
+          <el-table-column label="作者" align="center" width="200">
+            <template> admin </template>
           </el-table-column>
-          <el-table-column label="操作" min-width="100" fixed="right">
+          <el-table-column label="操作" align="center">
             <template>
-                <el-button size="medium" type="primary">编辑</el-button>
-                <el-button size="medium" type="primary">详情</el-button>
-                <el-button size="medium" type="danger">删除</el-button>
+                <el-button size="small" type="primary" icon="el-icon-edit">编辑</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -53,15 +51,11 @@ export default {
   },
 
   methods: {
-    getCookie (name) {
-      var value = '; ' + document.cookie
-      var parts = value.split('; ' + name + '=')
-      if (parts.length === 2) return parts.pop().split(';').shift()
-    },
     GetEcrImages() {
       GetEcrImages()
         .then(response => {
           this.ImageList = response
+          console.log(this.ImageList)
       }, response => {
         console.log(response);
       });

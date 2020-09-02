@@ -9,7 +9,7 @@ export function GetEcrTags(image) {
     return request({
       url: '/api/GetEcrTags/',
       method: 'get',
-      params: { image: image }
+      params: { app: image }
     })
   }
 // export function testapi() {

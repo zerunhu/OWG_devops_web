@@ -218,14 +218,14 @@ export const asyncRouterMap = [
     },
     { 
       path: 'file/:id(\\d+)',
-      component: () => import('@/views/ci/example/edit'),
+      component: () => import('@/views/ci/file/edit'),
       name: 'file信息',
       meta: { roles: ['admin','huzerun'] , title: "File" },
       hidden: true
     },
     {
       path: 'list',
-      component: () => import('@/views/ci/example/list'),
+      component: () => import('@/views/ci/file/list'),
       name: 'ArticleList',
       meta: { title: 'Article List' }
     }

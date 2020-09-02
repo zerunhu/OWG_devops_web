@@ -29,12 +29,7 @@ export function pushImage(id) {
     method: 'post',
   })
 }
-//   export function createContainer() {
-//     return request({
-//       url: '/api/cicontainers/',
-//       method: 'post',
-//     })
-//   }
+
 //   export function createContainer() {
 //     return request({
 //       url: '/api/cicontainers/',

@@ -1,27 +1,30 @@
 <template>
-  <div class="home move" >
+  <div class="app-container" >
     <el-row>
-        <el-table :data="svnInfo" style="width: 100%" >
-          <el-table-column label="编号" min-width="40">
+        <el-table :data="svnInfo" border fit highlight-current-row style="width: 100%" >
+          <el-table-column label="编号" align="center" width="100px">
             <template slot-scope="scope"> {{ scope.row.num  }} </template>
           </el-table-column>
-          <el-table-column label="提交人" min-width="40">
+          <el-table-column label="提交人" align="center" width="120px">
             <template slot-scope="scope"> {{ scope.row.commiter }} </template>
           </el-table-column>
-          <el-table-column label="时间" min-width="120">
+          <el-table-column label="时间" align="center" width="360px">
             <template slot-scope="scope"> {{ scope.row.date }}</template>
           </el-table-column>
-          <el-table-column label="行数" min-width="30">
+          <el-table-column label="行数" align="center" width="100px">
             <template slot-scope="scope"> {{ scope.row.line }}</template>
           </el-table-column>
-          <el-table-column label="提交信息" min-width="100">
+          <el-table-column label="提交信息" align="center" width="400px">
             <template slot-scope="scope"> {{ scope.row.commit_message }}</template>
           </el-table-column>
-          <el-table-column label="操作" min-width="80" fixed="right">
+          <el-table-column label="操作"  align="center" >
             <template>
-                <el-button size="medium" type="primary">编辑</el-button>
-                <el-button size="medium" type="primary">详情</el-button>
-                <!-- <el-button size="medium" type="danger">删除</el-button> -->
+                <el-button type="primary" size="small" icon="el-icon-edit">
+                  Edit
+                </el-button>
+                <!-- <el-button type="danger" size="small" icon="el-icon-delete">
+                  Delete
+                </el-button> -->
             </template>
           </el-table-column>
         </el-table>
@@ -57,9 +60,4 @@ export default {
     }
 }
 </script>
-<style scoped>
-.move {
-  padding-left: 30px;
-  padding-top: 30px;
-}
-</style>>
+
