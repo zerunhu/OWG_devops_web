@@ -229,26 +229,33 @@ export const asyncRouterMap = [
       name: 'ArticleList',
       meta: { title: 'Article List' }
     }
-    // {
-    // path: '/example',
-    // component: Layout,
-    // redirect: '/example/list',
-    // name: 'Example',
-    // meta: {
-    //   title: 'Example',
-    //   icon: 'el-icon-s-help'
-    // },
-    // // children: [
-    //   {
-    //     path: 'edit/:id(\\d+)',
-    //     component: () => import('@/views/ci/example/edit'),
-    //     name: 'EditArticle',
-    //     meta: { title: 'Edit Article', noCache: true, activeMenu: '/example/list' },
-    //     hidden: true
-    //   },
-    // ]
-  // },
-
+    ]
+  },
+  {
+    path: '/CD',
+    component: Layout,
+    name: 'cd',
+    alwaysShow: true,
+    meta: { roles: ['admin','huzerun'] , title: "CD", icon: 'CD' }, //页面需要的权限
+    children: [
+    { 
+      path: 'cluster',
+      component: () => import('@/views/cd/cluster/'),
+      name: 'cluster',
+      meta: { roles: ['admin','huzerun'] , title: "cluster" }  
+    },
+    { 
+      path: 'nodegroup',
+      component: () => import('@/views/cd/nodegroup/'),
+      name: 'nodegroup',
+      meta: { roles: ['admin','huzerun'] , title: "nodegroup" }  
+    },
+    { 
+      path: 'namespace',
+      component: () => import('@/views/cd/namespace/'),
+      name: 'namespace',
+      meta: { roles: ['admin','huzerun'] , title: "namespace" }  
+    },
     ]
   },
   { path: '*', redirect: '/404', hidden: true }

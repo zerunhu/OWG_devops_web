@@ -30,9 +30,9 @@ export function pushImage(id) {
   })
 }
 
-//   export function createContainer() {
-//     return request({
-//       url: '/api/cicontainers/',
-//       method: 'post',
-//     })
-//   }
+  export function testapi() {
+    return request({
+      url: '/api/healthy/',
+      method: 'get',
+    })
+  }

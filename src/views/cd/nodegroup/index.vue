@@ -120,7 +120,6 @@ export default {
           this.dialogVisible = true,
           this.result_data = response.message,
           this.dialogTitle = "同步失败",
-          this.createLoading = false
           console.log(response)
         }
         });
