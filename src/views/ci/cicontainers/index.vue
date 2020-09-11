@@ -22,37 +22,66 @@
           </el-table-column>
           <el-table-column label="操作" align="center">
             <template slot-scope="scope" v-if="scope.row.create_user == user_name">
-                <el-button size="small" type="primary" icon="el-icon-set-up" :loading=scope.row.buildloading @click="buildImage(scope.row)">构建</el-button>
+                <el-button size="small" type="primary" icon="el-icon-set-up" @click="buildDialog(scope.row.id)">构建</el-button>
                 <el-button size="small" type="primary" icon="el-icon-upload" :loading=scope.row.pushloading @click="pushImage(scope.row)">推送</el-button>
                 <el-button size="small" type="danger" icon="el-icon-delete" @click="deleteConfirm(scope.row.id)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
     </el-row>
-    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" width="30%">
-      <div style="height: 400px;overflow-y:scroll;">
+    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" width="40%">
+      <div class="dialogStyle" id="scroll">
         <span class="comment" > {{ result_data }} </span>
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="dialogVisible = false, getContainer()">确 定</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog title="Build" :visible.sync="dialogbuildVisible" width="40%" :closeOnClickModal=false :showClose=false>
+      <el-form :model="buildForm">
+        <!-- <el-form-item label="world_name" label-width="110px">
+          <el-input v-model="updateForm.world_name" autocomplete="off" :disabled="true"></el-input>
+        </el-form-item> -->
+        <el-form-item label="ecr_addr" label-width="110px">
+          <el-select style="width:220px;" filterable  v-model="buildForm.ecraddr" placeholder="请选择ecr地址">
+            <el-option
+              v-for="item in EcraddrList"
+              :key="item"
+              :label="item"
+              :value="item">
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogbuildVisible = false; dialogDestry()">取 消</el-button>
+        <el-button type="primary" :loading="buildloading" @click="buildImage()">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
   
 </template>
 
 <script>
-import { getContainer,createContainer,deleteContainer,buildImage,pushImage } from '@/api/cicontainer.js'
+import { getContainer,createContainer,deleteContainer,getEcraddr,buildImage,pushImage } from '@/api/ci/cicontainer.js'
 import store from '@/store'
 export default {
   data() {
     return {
       containerList:[],
+      EcraddrList: [],
       createLoading: false,
       user_name: store.getters.name,
       dialogVisible: false,
       result_data: "",
       dialogTitle: "",
+      dialogbuildVisible: false,
+      buildForm: {
+        id: "",
+        ecraddr: "",
+      },
+      buildloading: false
     }
   },
   mounted: function () {
@@ -60,21 +89,44 @@ export default {
   },
 
   methods: {
-    
-    buildImage(row) {
-      this.$set(row,"buildloading",true)
-      buildImage(row.id)
+    scrollDown(){
+      this.$nextTick(() => {   //滚动条最下函数
+        let msg = document.getElementById('scroll') // 获取对象
+        msg.scrollTop = msg.scrollHeight // 滚动高度
+      })
+    },
+    getEcraddr(){
+      getEcraddr()
+        .then(response => {
+          this.EcraddrList=response 
+        }, response => {
+          console.log(response);
+        }) 
+    },
+    buildDialog(id){
+      this.buildForm.id=id;
+      this.getEcraddr();
+      this.dialogbuildVisible=true
+    },
+    buildImage() {
+      this.buildloading=true
+      buildImage(this.buildForm.id,{ecr_addr: this.buildForm.ecraddr})
         .then(response => {
           if (response.status == 200){
             this.dialogVisible = true,
+            this.buildloading=false,
+            this.dialogbuildVisible=false,
             this.result_data = response.message,
             this.dialogTitle = "构建成功",
-            this.$set(row,"buildloading",false)
+            this.scrollDown()
         }else{
           this.dialogVisible = true,
+          this.buildloading=false,
+          this.dialogbuildVisible=false,
           this.result_data = response.message,
           this.dialogTitle = "构建失败",
-          console.log(response)
+          console.log(response),
+          this.scrollDown()
         }
         });
     },
@@ -86,12 +138,15 @@ export default {
             this.dialogVisible = true,
             this.result_data = response.message,
             this.dialogTitle = "推送成功",
-            this.$set(row,"buildloading",false)
+            this.$set(row,"pushloading",false),
+            this.scrollDown()
           }else{
             this.dialogVisible = true,
             this.result_data = response.message,
             this.dialogTitle = "推送失败",
-            console.log(response)
+            this.$set(row,"pushloading",false),
+            console.log(response),
+            this.scrollDown()
           }
         });
     },
@@ -99,7 +154,7 @@ export default {
       getContainer()
         .then(response => {
             this.containerList = response.map(v =>{
-              this.$set(v,"buildloading",false)
+              // this.$set(v,"buildloading",false)
               this.$set(v,"pushloading",false)
               return v
             })
@@ -116,40 +171,18 @@ export default {
             this.result_data = response.message,
             this.dialogTitle = "同步成功",
             this.createLoading = false
+            this.scrollDown()
         }else{
+          this.scrollDown()
           this.dialogVisible = true,
           this.result_data = response.message,
           this.dialogTitle = "同步失败",
           this.createLoading = false
           console.log(response)
+          this.scrollDown()
         }
         });
     },
-
-    // deleteConfirm(pk) {
-    //   this.$confirm('此操作将永久删除该容器, 是否继续?', '提示', {
-    //     confirmButtonText: '确定',
-    //     cancelButtonText: '取消',
-    //     type: 'warning'
-    //   }).then(() => {
-    //     this.deleteContainer(pk);
-    //   }).catch(() => {
-    //     this.$message({
-    //       type: 'info',
-    //       message: '已取消删除'
-    //     });
-    //   });
-    // },
-    // deleteContainer(index){
-    //   deleteContainer(index)
-    //     .then(response => {
-    //       this.$message({message: '删除成功',type: 'success'});
-    //       this.getContainer()
-    //     }, response => {
-    //       console.log(response);
-    //   });
-    // },  
-
 
     deleteConfirm(pk) {
       this.$confirm('此操作将永久删除该容器, 是否继续?', '提示', {
@@ -182,6 +215,12 @@ export default {
         }
       })
     },
+    dialogDestry(){
+      this.$message({
+        type: 'info',
+        message: '已取消'
+      });
+    },
   }
 }
 </script>
@@ -193,4 +232,11 @@ export default {
 .comment{
     white-space:pre-wrap;
 } 
+.dialogStyle{
+  height: 400px;
+  overflow-y:scroll;
+  background:black;
+  font-size: 16px;
+  color: aliceblue;
+}
 </style>>

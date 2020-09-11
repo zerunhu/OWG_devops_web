@@ -194,7 +194,7 @@ export const asyncRouterMap = [
   {
     path: '/Continuousintegration',
     component: Layout,
-    name: '权限测试',
+    name: 'ci',
     alwaysShow: true,
     meta: { roles: ['admin','huzerun'] , title: "ContinueIntegra", icon: 'ci' }, //页面需要的权限
     children: [
@@ -236,7 +236,7 @@ export const asyncRouterMap = [
     component: Layout,
     name: 'cd',
     alwaysShow: true,
-    meta: { roles: ['admin','huzerun'] , title: "CD", icon: 'CD' }, //页面需要的权限
+    meta: { roles: ['admin','huzerun'] , title: "CD", icon: 'cd' }, //页面需要的权限
     children: [
     { 
       path: 'cluster',
@@ -251,10 +251,10 @@ export const asyncRouterMap = [
       meta: { roles: ['admin','huzerun'] , title: "nodegroup" }  
     },
     { 
-      path: 'namespace',
-      component: () => import('@/views/cd/namespace/'),
-      name: 'namespace',
-      meta: { roles: ['admin','huzerun'] , title: "namespace" }  
+      path: 'world',
+      component: () => import('@/views/cd/world/'),
+      name: 'world',
+      meta: { roles: ['admin','huzerun'] , title: "world" }  
     },
     ]
   },

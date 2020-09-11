@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import { Filelist } from '@/api/file'
+import { Filelist } from '@/api/ci/file'
 
 export default {
   name: 'ArticleList',

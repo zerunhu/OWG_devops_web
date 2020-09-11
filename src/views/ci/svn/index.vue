@@ -32,7 +32,7 @@
   </div>
 </template>
 <script>
-import { getSvnInfo } from '@/api/svn'
+import { getSvnInfo } from '@/api/ci/svn'
 export default {
   data() {
     return {

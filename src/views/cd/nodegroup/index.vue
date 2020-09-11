@@ -1,185 +1,158 @@
 <template>
   <div class="app-container" >
-    <el-row>
-        <el-button size="medium" type="primary" icon="el-icon-download" :loading=createLoading @click="createContainer()" style="float:left; margin: 2px;">同步代码</el-button>
-    </el-row>
+
+    <el-select style="width:220px;" v-model="value" placeholder="请选择应用名称" @change="getNodegroup()">
+        <el-option
+          v-for="item in ClusterList"
+          :key="item"
+          :label="item"
+          :value="item">
+        </el-option>
+    </el-select>
+
+    <!-- <el-row style="margin-top: 10px">
+        <el-button size="medium" type="primary" icon="el-icon-download"  @click="ScaleNodeGroup()" style="float:left; margin: 2px;">同步代码</el-button>
+    </el-row> -->
     <el-row style="margin-top: 10px">
-        <el-table :data="containerList" border fit highlight-current-row style="width: 100%" >
-          <el-table-column label="编号" align="center" width="160px">
-            <template slot-scope="scope"> {{ scope.row.id  }} </template>
+        <el-table :data="nodegroupList" border fit highlight-current-row style="width: 100%" >
+          <el-table-column label="name" align="center" width="200px">
+            <template slot-scope="scope"> {{ scope.row.name  }} </template>
           </el-table-column>
-          <el-table-column label="svn_num" align="center" width="200px">
-            <template slot-scope="scope"> {{ scope.row.svn_num }} </template>
+          <el-table-column label="cluster" align="center" width="240px">
+            <template> {{ value }} </template>
           </el-table-column>
-          <el-table-column label="container_id" align="center" width="240px">
-            <template slot-scope="scope"> {{ scope.row.container_id }}</template>
+          <el-table-column label="min_size" align="center" width="200px">
+            <template slot-scope="scope"> {{ scope.row.min_size }}</template>
           </el-table-column>
-          <el-table-column label="创建人" align="center" width="200px">
-            <template slot-scope="scope"> {{ scope.row.create_user }} </template>
+          <el-table-column label="max_size" align="center" width="200px">
+            <template slot-scope="scope"> {{ scope.row.max_size }} </template>
           </el-table-column>
-          <el-table-column label="build_count" align="center" width="180px">
-            <template slot-scope="scope"> {{ scope.row.build_count }}</template>
+          <el-table-column label="capacity" align="center" width="180px">
+            <template slot-scope="scope"> {{ scope.row.capacity }}</template>
           </el-table-column>
           <el-table-column label="操作" align="center">
-            <template slot-scope="scope" v-if="scope.row.create_user == user_name">
-                <el-button size="small" type="primary" icon="el-icon-set-up" :loading=scope.row.buildloading @click="buildImage(scope.row)">构建</el-button>
-                <el-button size="small" type="primary" icon="el-icon-upload" :loading=scope.row.pushloading @click="pushImage(scope.row)">推送</el-button>
-                <el-button size="small" type="danger" icon="el-icon-delete" @click="deleteConfirm(scope.row.id)">删除</el-button>
+            <template slot-scope="scope">
+                <el-button size="small" type="primary" icon="el-icon-connection" :loading=scope.row.pushloading @click="sacleFrom(scope.row)">scale</el-button>
+                <el-button size="small" type="danger" icon="el-icon-delete">delete</el-button>
             </template>
           </el-table-column>
         </el-table>
     </el-row>
-    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" width="30%">
-      <div style="height: 400px;overflow-y:scroll;">
-        <span class="comment" > {{ result_data }} </span>
+    
+    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" width="50%" :closeOnClickModal=false :closeOnPressEscape=false :showClose=false>
+      <div class="dialogStyle" id="scroll">
+        <span class="comment" > {{ dialog_data }} </span>
       </div>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogVisible = false, getContainer()">确 定</el-button>
+        <el-button type="primary" @click="destry()">确 定</el-button>
       </span>
+    </el-dialog>
+
+    <el-dialog title="Scale" :visible.sync="dialogFormVisible" width="40%" :closeOnClickModal=false :closeOnPressEscape=false :showClose=false>
+      <el-form :model="form">
+        <el-form-item label="max_size" :label-width="formLabelWidth">
+          <el-input v-model="form.max_size" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="capacity" :label-width="formLabelWidth">
+          <el-input v-model="form.capacity" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" :loading="sacleLoading" @click="ScaleNodeGroup()">{{sacleLoading?"提交中...":"确定"}}</el-button>
+      </div>
     </el-dialog>
   </div>
   
 </template>
 
 <script>
-import { getContainer,createContainer,deleteContainer,buildImage,pushImage } from '@/api/cicontainer.js'
+import { DeleteRealLog,GetRealLog,ScaleNodeGroup,GetNodegroup,getCluster } from '@/api/cd/nodegroup.js'
 import store from '@/store'
 export default {
   data() {
     return {
-      containerList:[],
-      createLoading: false,
-      user_name: store.getters.name,
-      dialogVisible: false,
-      result_data: "",
+      ClusterList: "",
+      nodegroupList: [],
+      timer: "",
+      dialog_data: "loading...",
       dialogTitle: "",
+      dialogVisible: false,
+      dialogFormVisible: false,
+      path: "",
+      value: "", 
+      form: {
+        max_size: '',
+        capacity: '',
+        ng_id: '',
+      },
+      sacleLoading: false,
+      formLabelWidth: '80px',
     }
   },
   mounted: function () {
-    this.getContainer()
+    this.getCluster()
   },
-
   methods: {
-    
-    buildImage(row) {
-      this.$set(row,"buildloading",true)
-      buildImage(row.id)
+    getCluster(){
+      getCluster()
         .then(response => {
-          if (response.status == 200){
-            this.dialogVisible = true,
-            this.result_data = response.message,
-            this.dialogTitle = "构建成功",
-            this.$set(row,"buildloading",false)
-        }else{
-          this.dialogVisible = true,
-          this.result_data = response.message,
-          this.dialogTitle = "构建失败",
-          console.log(response)
-        }
-        });
+            this.ClusterList = response
+        }, response => {
+            console.log(response);
+        }) 
     },
-    pushImage(row) {
-      this.$set(row,"pushloading",true)
-      pushImage(row.id)
+    getNodegroup(){
+      GetNodegroup(this.value)
         .then(response => {
-          if (response.status == 200){
-            this.dialogVisible = true,
-            this.result_data = response.message,
-            this.dialogTitle = "推送成功",
-            this.$set(row,"buildloading",false)
-          }else{
-            this.dialogVisible = true,
-            this.result_data = response.message,
-            this.dialogTitle = "推送失败",
-            console.log(response)
-          }
-        });
+            this.nodegroupList = response
+        }, response => {
+            console.log(response);
+        }) 
     },
-    getContainer() {
-      getContainer()
+    sacleFrom(row){
+      this.dialogFormVisible=true
+      this.form.max_size=row.max_size
+      this.form.capacity=row.capacity
+      this.form.ng_id=row.id
+      console.log(this.form)
+    },
+    getData(){
+      GetRealLog(this.path)
         .then(response => {
-            this.containerList = response.map(v =>{
-              this.$set(v,"buildloading",false)
-              this.$set(v,"pushloading",false)
-              return v
+            this.dialog_data = response
+            this.$nextTick(() => {   //滚动条最下函数
+            let msg = document.getElementById('scroll') // 获取对象
+            msg.scrollTop = msg.scrollHeight // 滚动高度
             })
         }, response => {
             console.log(response);
-        });
+        })   
     },
-    createContainer() {
-      this.createLoading=true
-      createContainer()
+    ScaleNodeGroup() {
+      this.dialogFormVisible=false,
+      this.dialogVisible = true,
+      this.path = '/tmp/scale_nodegroup.log',
+      this.dialogTitle = "Loading"
+      ScaleNodeGroup(this.form.ng_id, { max_size: this.form.max_size, capacity:this.form.capacity })
         .then(response => {
-        if (response.status == 200){
-            this.dialogVisible = true,
-            this.result_data = response.message,
-            this.dialogTitle = "同步成功",
-            this.createLoading = false
-        }else{
-          this.dialogVisible = true,
-          this.result_data = response.message,
-          this.dialogTitle = "同步失败",
-          console.log(response)
-        }
+          clearInterval(this.timer)
+          this.getData()
+        }, response => {
+          clearInterval(this.timer)
+          this.getData()
+          console.log(response);
         });
+      this.timer = setInterval(() => {
+          setTimeout(this.getData)
+      }, 1000)
     },
-
-    // deleteConfirm(pk) {
-    //   this.$confirm('此操作将永久删除该容器, 是否继续?', '提示', {
-    //     confirmButtonText: '确定',
-    //     cancelButtonText: '取消',
-    //     type: 'warning'
-    //   }).then(() => {
-    //     this.deleteContainer(pk);
-    //   }).catch(() => {
-    //     this.$message({
-    //       type: 'info',
-    //       message: '已取消删除'
-    //     });
-    //   });
-    // },
-    // deleteContainer(index){
-    //   deleteContainer(index)
-    //     .then(response => {
-    //       this.$message({message: '删除成功',type: 'success'});
-    //       this.getContainer()
-    //     }, response => {
-    //       console.log(response);
-    //   });
-    // },  
-
-
-    deleteConfirm(pk) {
-      this.$confirm('此操作将永久删除该容器, 是否继续?', '提示', {
-        showCancelButton: true,
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        beforeClose: (action, instance, done) => {
-          if (action === 'confirm') {
-            instance.confirmButtonLoading = true;
-            instance.confirmButtonText = '执行中...';
-            deleteContainer(pk)
-            .then(response => {
-              instance.confirmButtonLoading = false;
-              done()
-              this.getContainer()
-              this.$message({
-                type: 'success',
-                message: '删除成功'
-              });
-            }, response => {
-              console.log(response);
-            });
-          } else {
-            this.$message({
-            type: 'info',
-            message: '已取消删除'
-            });
-            done();
-          }
-        }
-      })
+    destry() { 
+      this.dialogVisible = false,
+      DeleteRealLog({ path: this.path })
+      this.dialog_data="loading..."
+      clearInterval(this.timer)
+      this.getNodegroup()
     },
   }
 }
@@ -192,4 +165,11 @@ export default {
 .comment{
     white-space:pre-wrap;
 } 
+.dialogStyle{
+  height: 400px;
+  overflow-y:scroll;
+  background:black;
+  font-size: 16px;
+  color: aliceblue;
+}
 </style>>

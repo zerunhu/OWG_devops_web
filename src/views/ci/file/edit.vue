@@ -23,7 +23,7 @@
 <script>
 import Tinymce from '@/components/Tinymce'
 import MDinput from '@/components/MDinput'
-import { Fileedit,Filepush } from '@/api/file'
+import { Fileedit,Filepush } from '@/api/ci/file'
 
 const defaultForm = {
   title: '', // 文章题目
