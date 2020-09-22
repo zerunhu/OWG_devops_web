@@ -14,19 +14,19 @@
 
     <el-row style="margin-top: 10px">
         <el-table :data="TagList" border fit highlight-current-row  style="width: 100%" >
-          <el-table-column label="镜像名称" align="center" width="200">
+          <el-table-column label="镜像名称" align="center" min-width="200">
             <template > {{ value }} </template>
           </el-table-column>
-          <el-table-column label="tag" align="center" width="160">
+          <el-table-column label="tag" align="center" min-width="160">
             <template slot-scope="scope"> {{ scope.row.tag }} </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" width="240">
+          <el-table-column label="创建时间" align="center" min-width="240">
             <template slot-scope="scope"> {{ scope.row.create_time }}</template>
           </el-table-column>
-          <el-table-column label="ecr_address" align="center" width="400">
+          <el-table-column label="ecr_address" align="center" min-width="400">
             <template slot-scope="scope"> {{ scope.row.ecr_address }} </template>
           </el-table-column>
-          <el-table-column label="操作" align="center">
+          <el-table-column label="操作" align="center" min-width="200">
             <template>
                 <el-button size="small" type="primary" icon="el-icon-edit">编辑</el-button>
             </template>

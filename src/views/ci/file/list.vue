@@ -7,33 +7,33 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="160px" align="center" label="Author">
+      <el-table-column min-width="160px" align="center" label="Author">
         <template slot-scope="scope">
           <span>{{ scope.row.author }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="120px" align="center" label="type">
+      <el-table-column min-width="120px" align="center" label="type">
         <template slot-scope="scope">
           <span>{{ scope.row.type }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="400px" align="center" label="path">
+      <el-table-column min-width="400px" align="center" label="path">
         <template slot-scope="scope">
           <span>{{ scope.row.path }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="300px" align="center" label="desc">
+      <el-table-column min-width="300px" align="center" label="desc">
         <template slot-scope="scope">
           <span>{{ scope.row.desc }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="Actions" >
+      <el-table-column align="center" label="Actions" min-width="200">
         <template slot-scope="scope">
-          <router-link :to="'file/'+scope.row.id">
+          <router-link :to="'edit/'+scope.row.id">
             <el-button type="primary" size="small" icon="el-icon-edit">
               Edit
             </el-button>

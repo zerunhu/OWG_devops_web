@@ -1,6 +1,6 @@
 <template>
   <div class="app-container" >
-    <el-select style="width:220px;" v-model="value" placeholder="请选择应用名称" @change="getWorld()">
+    <el-select style="width:220px;" v-model="value" placeholder="请选择cluster环境" @change="getWorld();getImages()">
         <el-option
           v-for="item in ClusterList"
           :key="item"
@@ -8,27 +8,31 @@
           :value="item">
         </el-option>
     </el-select>
-    <el-row style="float:right"  v-if="value!=''">
-        <el-button size="medium" type="primary" icon="el-icon-copy-document"  @click="dialogCreateFormVisible=true" style="height:40px;" >new world</el-button>
+    <el-row style="float:right;margin-top: 15px;margin-right:5px;"  v-if="value!=''">
+        <el-button size="medium" type="primary" icon="el-icon-copy-document"  @click="dialogCreateFormVisible=true" style="height:40px;" >{{ create_Value }}</el-button>
     </el-row>
-    <el-row style="margin-top: 10px">
-        <el-table :data="nodegroupList" border fit highlight-current-row style="width: 100%" >
-          <el-table-column label="name" align="center" width="200px">
+    <el-tabs style="margin-top: 10px" type="card" v-model="paneActiveName" @tab-click="handleClick">
+      <el-tab-pane label="world" name="world"></el-tab-pane>
+      <el-tab-pane label="global" name="global"></el-tab-pane>
+    </el-tabs>
+    <el-row style="margin-top: -16px">
+        <el-table :data="tableDataList" border fit highlight-current-row style="width: 100%" >
+          <el-table-column label="name" align="center" min-width="200px">
             <template slot-scope="scope"> {{ scope.row.name  }} </template>
           </el-table-column>
-          <el-table-column label="cluster" align="center" width="200px">
+          <el-table-column label="cluster" align="center" min-width="200px">
             <template> {{ value }} </template>
           </el-table-column>
-          <el-table-column label="create_time" align="center" width="240px">
+          <el-table-column label="create_time" align="center" min-width="240px">
             <template slot-scope="scope"> {{ scope.row.create_time }}</template>
           </el-table-column>
-          <el-table-column label="update_time" align="center" width="240px">
+          <el-table-column label="update_time" align="center" min-width="240px">
             <template slot-scope="scope"> {{ scope.row.update_time }} </template>
           </el-table-column>
-          <el-table-column label="image_tag" align="center" width="180px">
+          <el-table-column label="image_tag" align="center" min-width="180px">
             <template slot-scope="scope"> {{ scope.row.image_tag }} </template>
           </el-table-column>
-          <el-table-column label="操作" align="center">
+          <el-table-column label="操作" align="center" min-width="300px">
             <template slot-scope="scope">
                 <el-button size="small" type="warning" icon="el-icon-odometer" @click="updateDialog(scope.row)">upgrade</el-button>
                 <el-button size="small" type="danger" icon="el-icon-delete" @click="deleteConfirm(scope.row.id)">delete</el-button>
@@ -36,6 +40,7 @@
           </el-table-column>
         </el-table>
     </el-row>
+
     <!-- 实时日志dialog、 -->
     <el-dialog title="RealLog" :visible.sync="dialogRealLogVisible" width="50%" :closeOnClickModal=false :closeOnPressEscape=false :showClose=false>
       <div class="dialogStyle" id="scroll">
@@ -51,7 +56,7 @@
         <el-form-item label="cluster_name" label-width="110px">
           <el-input v-model="this.value" autocomplete="off" :disabled="true"></el-input>
         </el-form-item>
-        <el-form-item label="world_id" label-width="110px">
+        <el-form-item :label="createForm.label_name" label-width="110px">
           <el-input v-model="createForm.world_id" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="image_tag" label-width="110px">
@@ -73,7 +78,7 @@
     <!-- 更新dialog、 -->
     <el-dialog title="Update" :visible.sync="dialogUpdateFormVisible" width="40%" :closeOnClickModal=false :showClose=false>
       <el-form :model="updateForm">
-        <el-form-item label="world_name" label-width="110px">
+        <el-form-item :label="updateForm.label_name" label-width="110px">
           <el-input v-model="updateForm.world_name" autocomplete="off" :disabled="true"></el-input>
         </el-form-item>
         <el-form-item label="image_tag" label-width="110px">
@@ -102,18 +107,22 @@ import store from '@/store'
 export default {
   data() {
     return {
+      paneActiveName: "world",
+      create_Value: "New world",
       ClusterList: "",
-      nodegroupList: [],
+      tableDataList: [],
       value: "",
       createForm: {
         world_id: "",
         cluster_name: "",
         image_tag: "",
+        label_name: "world_id",
       },
       updateForm: {
         world_name: "",
         image_tag: "",
         world_id: "",
+        label_name: "world_name",
       },
       ImageList: "",
       formLabelWidth: '80px',
@@ -130,7 +139,6 @@ export default {
   mounted: function () {
     // DeleteRealLog({ path: this.all_reallog })
     this.getCluster()
-    this.getImages()
   },
   methods: {
     getCluster(){
@@ -141,10 +149,16 @@ export default {
             console.log(response);
         }) 
     },
+    handleClick(tab, event) {
+      this.getWorld()
+      this.create_Value = "New "+this.paneActiveName
+      this.createForm.label_name = this.paneActiveName+"_id"
+      this.updateForm.label_name = this.paneActiveName+"_name"
+    },
     getWorld(){
-      getWorld(this.value)
+      getWorld(this.value,this.paneActiveName)
         .then(response => {
-            this.nodegroupList = response
+            this.tableDataList = response
         }, response => {
             console.log(response);
         }) 
@@ -153,7 +167,7 @@ export default {
       this.dialogCreateFormVisible=false,
       this.dialogRealLogVisible = true,
       this.path = '/tmp/create_world.log',
-      createWorld({ cluster: this.value, world_id: this.createForm.world_id, image_tag: this.createForm.image_tag })
+      createWorld({ cluster: this.value, world_id: this.createForm.world_id, image_tag: this.createForm.image_tag, type: this.paneActiveName })
         .then(response => {
           clearInterval(this.timer)
           this.getData()
@@ -164,11 +178,11 @@ export default {
         });
       this.timer = setInterval(() => {
           setTimeout(this.getData)
-      }, 1000)
+      }, 3000)
       this.createForm.world_id=""
     },
     getImages(){
-      getImages()
+      getImages(this.value)
         .then(response => {
           this.ImageList=response 
         }, response => {
@@ -184,7 +198,7 @@ export default {
       this.dialogUpdateFormVisible=false,
       this.dialogRealLogVisible = true,
       this.path = '/tmp/update_world.log',
-      updateWorld( this.updateForm.world_id,{ image_tag: this.updateForm.image_tag })
+      updateWorld( this.updateForm.world_id,{ image_tag: this.updateForm.image_tag, type: this.paneActiveName })
         .then(response => {
           clearInterval(this.timer)
           this.getData()
@@ -195,7 +209,7 @@ export default {
         });
       this.timer = setInterval(() => {
           setTimeout(this.getData)
-      }, 1000)
+      }, 3000)
     },
 
     deleteConfirm(pk) {
@@ -227,7 +241,7 @@ export default {
         }) 
       this.timer = setInterval(() => {
           setTimeout(this.getData)
-      }, 1000)
+      }, 3000)
     },
     getData(){
       GetRealLog(this.path)

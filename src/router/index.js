@@ -192,69 +192,69 @@ export const asyncRouterMap = [
     }]
   },
   {
-    path: '/Continuousintegration',
+    path: '/integration',
     component: Layout,
     name: 'ci',
     alwaysShow: true,
-    meta: { roles: ['admin','huzerun'] , title: "ContinueIntegra", icon: 'ci' }, //页面需要的权限
+    meta: { roles: ['admin','huzerun'] , title: "ContinuousIntegra", icon: 'ci' }, //页面需要的权限
     children: [
     { 
       path: 'svn',
       component: () => import('@/views/ci/svn/'),
       name: 'svn测试页面',
-      meta: { roles: ['admin','huzerun'] , title: "svn" }  
+      meta: { roles: ['admin','huzerun'] , title: "Svn List" }  
     },
     { 
-      path: 'cicontainers',
+      path: 'ci',
       component: () => import('@/views/ci/cicontainers/'),
       name: '创建ci_container界面',
-      meta: { roles: ['admin','huzerun'] , title: "cicontainers" }  
+      meta: { roles: ['admin','huzerun'] , title: "CI List" }  
     },
     { 
-      path: 'ecr',
+      path: 'image',
       component: () => import('@/views/ci/ecr/'),
-      name: 'ecr信息',
-      meta: { roles: ['admin','huzerun'] , title: "ecr" }  
+      name: 'ecr_image信息',
+      meta: { roles: ['admin','huzerun'] , title: "Image List" }  
     },
     { 
-      path: 'file/:id(\\d+)',
+      path: 'file/edit/:id(\\d+)',
       component: () => import('@/views/ci/file/edit'),
-      name: 'file信息',
+      name: 'config详情修改',
       meta: { roles: ['admin','huzerun'] , title: "File" },
       hidden: true
     },
     {
-      path: 'list',
+      path: 'file/list',
       component: () => import('@/views/ci/file/list'),
-      name: 'ArticleList',
-      meta: { title: 'Article List' }
+      name: 'config_file列表',
+      meta: { title: 'Config List' }
     }
     ]
   },
   {
-    path: '/CD',
+    path: '/deploy',
     component: Layout,
     name: 'cd',
     alwaysShow: true,
-    meta: { roles: ['admin','huzerun'] , title: "CD", icon: 'cd' }, //页面需要的权限
+    meta: { roles: ['admin','huzerun'] , title: "ContinuousDeploy", icon: 'cd' }, //页面需要的权限
     children: [
     { 
       path: 'cluster',
       component: () => import('@/views/cd/cluster/'),
       name: 'cluster',
-      meta: { roles: ['admin','huzerun'] , title: "cluster" }  
+      meta: { roles: ['admin','huzerun'] , title: "Cluster List" }  
     },
     { 
       path: 'nodegroup',
       component: () => import('@/views/cd/nodegroup/'),
       name: 'nodegroup',
-      meta: { roles: ['admin','huzerun'] , title: "nodegroup" }  
+      meta: { roles: ['admin','huzerun'] , title: "Nodegroup List" }  
     },
     { 
       path: 'world',
       component: () => import('@/views/cd/world/'),
       name: 'world',
-      meta: { roles: ['admin','huzerun'] , title: "world" }  
+      meta: { roles: ['admin','huzerun'] , title: "World List" }  
     },
     ]
   },

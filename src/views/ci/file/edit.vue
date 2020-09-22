@@ -12,7 +12,7 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item prop="content" style="margin-bottom: 30px;">
+        <el-form-item prop="content" id="context">
           <Tinymce ref="editor" v-model="postForm.content" :height="400" />
         </el-form-item>
       </div>
@@ -82,6 +82,10 @@ export default {
   position: absolute;
   right: 10px;
 }
+// p{
+//   margin: 0px;
+//   color: aqua;
+// }
 .createPost-container {
   position: relative;
 

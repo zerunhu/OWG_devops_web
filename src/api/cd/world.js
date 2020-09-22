@@ -5,11 +5,11 @@ export function getCluster() {
     method: 'get',
   })
 }
-export function getWorld(cluster) {
+export function getWorld(cluster, type) {
   return request({
     url: '/api/world/',
     method: 'get',
-    params: { cluster: cluster }
+    params: { cluster: cluster, type: type }
   })
 }
 export function createWorld(data) {
@@ -19,10 +19,11 @@ export function createWorld(data) {
     data
   })
 }
-export function getImages() {
+export function getImages(cluster) {
   return request({
     url: '/api/images/',
     method: 'get',
+    params: { cluster: cluster }
   })
 }
 export function updateWorld(pk,data) {

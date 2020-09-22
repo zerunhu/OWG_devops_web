@@ -5,10 +5,11 @@ export function getContainer() {
     method: 'get',
   })
 }
-export function createContainer() {
+export function createContainer(data) {
   return request({
     url: '/api/cicontainers/',
     method: 'post',
+    data
   })
 }
 export function deleteContainer(id) {

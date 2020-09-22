@@ -1,7 +1,7 @@
 <template>
   <div class="app-container" >
 
-    <el-select style="width:220px;" v-model="value" placeholder="请选择应用名称" @change="getNodegroup()">
+    <el-select style="width:220px;" v-model="value" placeholder="请选择cluster环境" @change="getNodegroup()">
         <el-option
           v-for="item in ClusterList"
           :key="item"
@@ -15,22 +15,22 @@
     </el-row> -->
     <el-row style="margin-top: 10px">
         <el-table :data="nodegroupList" border fit highlight-current-row style="width: 100%" >
-          <el-table-column label="name" align="center" width="200px">
+          <el-table-column label="name" align="center" min-width="200px">
             <template slot-scope="scope"> {{ scope.row.name  }} </template>
           </el-table-column>
-          <el-table-column label="cluster" align="center" width="240px">
+          <el-table-column label="cluster" align="center" min-width="230px">
             <template> {{ value }} </template>
           </el-table-column>
-          <el-table-column label="min_size" align="center" width="200px">
+          <el-table-column label="min_size" align="center" min-width="190px">
             <template slot-scope="scope"> {{ scope.row.min_size }}</template>
           </el-table-column>
-          <el-table-column label="max_size" align="center" width="200px">
+          <el-table-column label="max_size" align="center" min-width="190px">
             <template slot-scope="scope"> {{ scope.row.max_size }} </template>
           </el-table-column>
-          <el-table-column label="capacity" align="center" width="180px">
+          <el-table-column label="capacity" align="center" min-width="170px">
             <template slot-scope="scope"> {{ scope.row.capacity }}</template>
           </el-table-column>
-          <el-table-column label="操作" align="center">
+          <el-table-column label="操作" align="center"  min-width="300px">
             <template slot-scope="scope">
                 <el-button size="small" type="primary" icon="el-icon-connection" :loading=scope.row.pushloading @click="sacleFrom(scope.row)">scale</el-button>
                 <el-button size="small" type="danger" icon="el-icon-delete">delete</el-button>
@@ -63,7 +63,6 @@
       </div>
     </el-dialog>
   </div>
-  
 </template>
 
 <script>
@@ -145,7 +144,7 @@ export default {
         });
       this.timer = setInterval(() => {
           setTimeout(this.getData)
-      }, 1000)
+      }, 3000)
     },
     destry() { 
       this.dialogVisible = false,

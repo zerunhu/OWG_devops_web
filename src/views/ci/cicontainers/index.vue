@@ -1,26 +1,26 @@
 <template>
   <div class="app-container" >
     <el-row>
-        <el-button size="medium" type="primary" icon="el-icon-download" :loading=createLoading @click="createContainer()" style="float:left; margin: 2px;">同步代码</el-button>
+        <el-button size="medium" type="primary" icon="el-icon-download" @click="dialogbranchVisible=true" style="float:left; margin: 2px;">同步代码</el-button>
     </el-row>
     <el-row style="margin-top: 10px">
         <el-table :data="containerList" border fit highlight-current-row style="width: 100%" >
-          <el-table-column label="编号" align="center" width="160px">
+          <el-table-column label="编号" align="center" min-width="160px">
             <template slot-scope="scope"> {{ scope.row.id  }} </template>
           </el-table-column>
-          <el-table-column label="svn_num" align="center" width="200px">
+          <el-table-column label="svn_num" align="center" min-width="200px">
             <template slot-scope="scope"> {{ scope.row.svn_num }} </template>
           </el-table-column>
-          <el-table-column label="container_id" align="center" width="240px">
+          <el-table-column label="container_id" align="center" min-width="240px">
             <template slot-scope="scope"> {{ scope.row.container_id }}</template>
           </el-table-column>
-          <el-table-column label="创建人" align="center" width="200px">
+          <el-table-column label="创建人" align="center" min-width="200px">
             <template slot-scope="scope"> {{ scope.row.create_user }} </template>
           </el-table-column>
-          <el-table-column label="build_count" align="center" width="180px">
+          <el-table-column label="build_count" align="center" min-width="180px">
             <template slot-scope="scope"> {{ scope.row.build_count }}</template>
           </el-table-column>
-          <el-table-column label="操作" align="center">
+          <el-table-column label="操作" align="center" min-width="300px">
             <template slot-scope="scope" v-if="scope.row.create_user == user_name">
                 <el-button size="small" type="primary" icon="el-icon-set-up" @click="buildDialog(scope.row.id)">构建</el-button>
                 <el-button size="small" type="primary" icon="el-icon-upload" :loading=scope.row.pushloading @click="pushImage(scope.row)">推送</el-button>
@@ -29,6 +29,26 @@
           </el-table-column>
         </el-table>
     </el-row>
+
+    <el-dialog title="Branch" :visible.sync="dialogbranchVisible" width="40%" :closeOnClickModal=false :showClose=false>
+      <el-form :model="branchForm">
+        <el-form-item label="branch" label-width="110px">
+          <el-select style="width:220px;" filterable  v-model="branchForm.branch" placeholder="请选择分支">
+            <el-option
+              v-for="item in branchList"
+              :key="item"
+              :label="item"
+              :value="item">
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogbranchVisible = false; dialogDestry()">取 消</el-button>
+        <el-button type="primary" :loading=createLoading @click="createContainer()">确认</el-button>
+      </div>
+    </el-dialog>
+
     <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" width="40%">
       <div class="dialogStyle" id="scroll">
         <span class="comment" > {{ result_data }} </span>
@@ -71,6 +91,7 @@ export default {
     return {
       containerList:[],
       EcraddrList: [],
+      branchList: ["trunk/TheWar-Server", "tags/server0.10.5_1"],
       createLoading: false,
       user_name: store.getters.name,
       dialogVisible: false,
@@ -81,6 +102,10 @@ export default {
         id: "",
         ecraddr: "",
       },
+      branchForm: {
+        branch: "",
+      },
+      dialogbranchVisible: false,
       buildloading: false
     }
   },
@@ -95,6 +120,14 @@ export default {
         msg.scrollTop = msg.scrollHeight // 滚动高度
       })
     },
+    // getBranch(){
+    //   branchList(this.branchForm.branch)
+    //     .then(response => {
+    //       this.branchList=response 
+    //     }, response => {
+    //       console.log(response);
+    //     }) 
+    // },
     getEcraddr(){
       getEcraddr()
         .then(response => {
@@ -164,20 +197,22 @@ export default {
     },
     createContainer() {
       this.createLoading=true
-      createContainer()
+      createContainer({branch: this.branchForm.branch})
         .then(response => {
         if (response.status == 200){
+            this.createLoading = false,
+            this.dialogbranchVisible = false,
             this.dialogVisible = true,
             this.result_data = response.message,
             this.dialogTitle = "同步成功",
-            this.createLoading = false
             this.scrollDown()
         }else{
           this.scrollDown()
+          this.createLoading = false,
+          this.dialogbranchVisible = false,
           this.dialogVisible = true,
           this.result_data = response.message,
           this.dialogTitle = "同步失败",
-          this.createLoading = false
           console.log(response)
           this.scrollDown()
         }
