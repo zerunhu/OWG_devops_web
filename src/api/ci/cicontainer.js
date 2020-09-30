@@ -37,3 +37,9 @@ export function pushImage(id) {
     method: 'post',
   })
 }
+export function getSvnBranch() {
+  return request({
+    url: '/api/svnbranch/',
+    method: 'get',
+  })
+}

@@ -5,11 +5,11 @@ export function GetEcrImages() {
     method: 'get',
   })
 }
-export function GetEcrTags(image) {
+export function GetEcrTags(image, cluster) {
     return request({
       url: '/api/GetEcrTags/',
       method: 'get',
-      params: { app: image }
+      params: { app: image, cluster: cluster }
     })
   }
 // export function testapi() {

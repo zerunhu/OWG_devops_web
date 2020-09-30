@@ -136,10 +136,10 @@ export default {
       ScaleNodeGroup(this.form.ng_id, { max_size: this.form.max_size, capacity:this.form.capacity })
         .then(response => {
           clearInterval(this.timer)
-          this.getData()
+          setTimeout(this.getData(),3000)
         }, response => {
           clearInterval(this.timer)
-          this.getData()
+          setTimeout(this.getData(),3000)
           console.log(response);
         });
       this.timer = setInterval(() => {

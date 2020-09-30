@@ -54,9 +54,15 @@ export function DeleteRealLog(data) {
   })
 }
 export function ScaleNodeGroup(data) {
-    return request({
-        url: '/api/nodegroup/1/',
-        method: 'put',
-        data
-    })
-  }
+  return request({
+      url: '/api/nodegroup/1/',
+      method: 'put',
+      data
+  })
+}
+export function GetWorldStatus(pk) {
+  return request({
+    url: '/api/world/'+pk+"/status/",
+    method: 'get',
+  })
+}

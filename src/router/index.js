@@ -256,6 +256,13 @@ export const asyncRouterMap = [
       name: 'world',
       meta: { roles: ['admin','huzerun'] , title: "World List" }  
     },
+    { 
+      path: 'world/:id(\\d+)',
+      component: () => import('@/views/cd/world/detail'),
+      name: 'world详情',
+      meta: { roles: ['admin','huzerun'] , title: "World Detail" },
+      hidden: true
+    },
     ]
   },
   { path: '*', redirect: '/404', hidden: true }

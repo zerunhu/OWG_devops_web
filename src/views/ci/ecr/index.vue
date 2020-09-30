@@ -12,7 +12,11 @@
       <!-- <el-button type="primary" @click="GetEcrTags()" :loading=isloading style="margin-left:10px">查询版本</el-button> -->
     </el-row>
 
-    <el-row style="margin-top: 10px">
+    <el-tabs style="margin-top: 10px" type="card" v-model="paneActiveName" @tab-click="GetEcrTags()">
+      <el-tab-pane label="ap-southeast-1" name="ap-southeast-1"></el-tab-pane>
+      <el-tab-pane label="us-west-2" name="us-west-2"></el-tab-pane>
+    </el-tabs>
+    <el-row style="margin-top: -16px">
         <el-table :data="TagList" border fit highlight-current-row  style="width: 100%" >
           <el-table-column label="镜像名称" align="center" min-width="200">
             <template > {{ value }} </template>
@@ -40,6 +44,7 @@ import { GetEcrImages,GetEcrTags } from '@/api/ci/ecr'
 export default {
   data() {
     return {
+      paneActiveName: "ap-southeast-1",
       ImageList:[],
       TagList:[],
       value: "",
@@ -62,7 +67,7 @@ export default {
     },
     GetEcrTags() {
       this.isloading=true
-      GetEcrTags(this.value)
+      GetEcrTags(this.value, this.paneActiveName)
         .then(response => {
           this.TagList = response
           this.isloading = false

@@ -1,24 +1,24 @@
 <template>
   <div class="app-container" >
     <el-row>
-        <el-button size="medium" type="primary" icon="el-icon-download" @click="dialogbranchVisible=true" style="float:left; margin: 2px;">同步代码</el-button>
+        <el-button size="medium" type="primary" icon="el-icon-download" @click="dialogbranchVisible=true;getSvnBranch()" style="float:left; margin: 2px;">同步代码</el-button>
     </el-row>
     <el-row style="margin-top: 10px">
         <el-table :data="containerList" border fit highlight-current-row style="width: 100%" >
-          <el-table-column label="编号" align="center" min-width="160px">
+          <el-table-column label="编号" align="center" min-width="140px">
             <template slot-scope="scope"> {{ scope.row.id  }} </template>
           </el-table-column>
-          <el-table-column label="svn_num" align="center" min-width="200px">
+          <el-table-column label="svn_num" align="center" min-width="180px">
             <template slot-scope="scope"> {{ scope.row.svn_num }} </template>
           </el-table-column>
-          <el-table-column label="container_id" align="center" min-width="240px">
-            <template slot-scope="scope"> {{ scope.row.container_id }}</template>
+          <el-table-column label="build_tag" align="center" min-width="280px">
+            <template slot-scope="scope"> {{ scope.row.build_tag }}</template>
           </el-table-column>
-          <el-table-column label="创建人" align="center" min-width="200px">
+          <el-table-column label="author" align="center" min-width="180px">
             <template slot-scope="scope"> {{ scope.row.create_user }} </template>
           </el-table-column>
-          <el-table-column label="build_count" align="center" min-width="180px">
-            <template slot-scope="scope"> {{ scope.row.build_count }}</template>
+          <el-table-column label="created_time" align="center" min-width="240px">
+            <template slot-scope="scope"> {{ scope.row.created_time }}</template>
           </el-table-column>
           <el-table-column label="操作" align="center" min-width="300px">
             <template slot-scope="scope" v-if="scope.row.create_user == user_name">
@@ -84,14 +84,14 @@
 </template>
 
 <script>
-import { getContainer,createContainer,deleteContainer,getEcraddr,buildImage,pushImage } from '@/api/ci/cicontainer.js'
+import { getContainer,createContainer,deleteContainer,getEcraddr,buildImage,pushImage,getSvnBranch } from '@/api/ci/cicontainer.js'
 import store from '@/store'
 export default {
   data() {
     return {
       containerList:[],
       EcraddrList: [],
-      branchList: ["trunk/TheWar-Server", "tags/server0.10.5_1"],
+      branchList: [],
       createLoading: false,
       user_name: store.getters.name,
       dialogVisible: false,
@@ -120,14 +120,14 @@ export default {
         msg.scrollTop = msg.scrollHeight // 滚动高度
       })
     },
-    // getBranch(){
-    //   branchList(this.branchForm.branch)
-    //     .then(response => {
-    //       this.branchList=response 
-    //     }, response => {
-    //       console.log(response);
-    //     }) 
-    // },
+    getSvnBranch(){
+      getSvnBranch()
+        .then(response => {
+          this.branchList=response 
+        }, response => {
+          console.log(response);
+        }) 
+    },
     getEcraddr(){
       getEcraddr()
         .then(response => {
@@ -189,6 +189,7 @@ export default {
             this.containerList = response.map(v =>{
               // this.$set(v,"buildloading",false)
               this.$set(v,"pushloading",false)
+              // console.log(v)
               return v
             })
         }, response => {

@@ -20,9 +20,9 @@
           <el-table-column label="name" align="center" min-width="200px">
             <template slot-scope="scope"> {{ scope.row.name  }} </template>
           </el-table-column>
-          <el-table-column label="cluster" align="center" min-width="200px">
+          <!-- <el-table-column label="cluster" align="center" min-width="200px">
             <template> {{ value }} </template>
-          </el-table-column>
+          </el-table-column> -->
           <el-table-column label="create_time" align="center" min-width="240px">
             <template slot-scope="scope"> {{ scope.row.create_time }}</template>
           </el-table-column>
@@ -32,10 +32,21 @@
           <el-table-column label="image_tag" align="center" min-width="180px">
             <template slot-scope="scope"> {{ scope.row.image_tag }} </template>
           </el-table-column>
+          <el-table-column label="healthy_check" align="center" min-width="180px">
+            <template slot-scope="scope">
+              <el-tag :type="scope.row.healthy === 'Healthy' ? 'success' : 'info'">
+                {{ scope.row.healthy }}
+              </el-tag>
+              <el-tooltip class="item" effect="dark" content="get world healthy" placement="top">
+                <a :class="scope.row.healthy_class" @click="GetWorldStatus(scope.row)"></a>
+              </el-tooltip>
+            </template>
+          </el-table-column>
           <el-table-column label="操作" align="center" min-width="300px">
             <template slot-scope="scope">
-                <el-button size="small" type="warning" icon="el-icon-odometer" @click="updateDialog(scope.row)">upgrade</el-button>
-                <el-button size="small" type="danger" icon="el-icon-delete" @click="deleteConfirm(scope.row.id)">delete</el-button>
+              <el-button size="small" type="primary" icon="el-icon-chat-line-square" @click="$router.push({path:'world/'+scope.row.id})">Details</el-button>
+              <el-button size="small" type="warning" icon="el-icon-odometer" @click="updateDialog(scope.row)">Upgrade</el-button>
+              <el-button size="small" type="danger" icon="el-icon-delete" @click="deleteConfirm(scope.row.id)">Delete</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -102,7 +113,7 @@
 </template>
 
 <script>
-import { getCluster,getWorld,createWorld,getImages,updateWorld,deleteWorld,GetRealLog,DeleteRealLog } from '@/api/cd/world.js'
+import { getCluster,getWorld,createWorld,getImages,updateWorld,deleteWorld,GetRealLog,DeleteRealLog,GetWorldStatus } from '@/api/cd/world.js'
 import store from '@/store'
 export default {
   data() {
@@ -133,6 +144,7 @@ export default {
       dialogCreateFormVisible: false,
       dialogDeleteVisible: false,
       dialogUpdateFormVisible: false,
+      // healthy_class: "el-icon-refresh-left healthy_stsyle",
       // all_reallog: ["/tmp/scale_nodegroup.log"],
     }
   },
@@ -158,7 +170,12 @@ export default {
     getWorld(){
       getWorld(this.value,this.paneActiveName)
         .then(response => {
-            this.tableDataList = response
+            // this.tableDataList = response
+            this.tableDataList = response.map(v =>{
+              this.$set(v,"healthy", "NoData")
+              this.$set(v,"healthy_class", "el-icon-refresh-left healthy_stsyle")
+              return v
+            })
         }, response => {
             console.log(response);
         }) 
@@ -180,6 +197,17 @@ export default {
           setTimeout(this.getData)
       }, 3000)
       this.createForm.world_id=""
+    },
+    GetWorldStatus(row){
+      this.$set(row, "healthy_class", "el-icon-loading healthy_stsyle")
+      GetWorldStatus(row.id)
+        .then(response => {
+          this.$set(row,"healthy",response)
+          this.$set(row, "healthy_class", "el-icon-refresh-left healthy_stsyle")
+        }, response => {
+          console.log(response);
+          this.$set(row, "healthy_class", "el-icon-refresh-left healthy_stsyle")
+      })
     },
     getImages(){
       getImages(this.value)
@@ -285,5 +313,12 @@ export default {
   background:black;
   font-size: 16px;
   color: aliceblue;
+}
+.healthy_stsyle{
+  font-size: 20px;
+  /* color:blue; */
+  position: relative;
+  top:3px;
+  left: 10px;
 }
 </style>>
