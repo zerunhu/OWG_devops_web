@@ -32,8 +32,8 @@
           </el-table-column>
           <el-table-column label="操作" align="center"  min-width="300px">
             <template slot-scope="scope">
-                <el-button size="small" type="primary" icon="el-icon-connection" :loading=scope.row.pushloading @click="sacleFrom(scope.row)">scale</el-button>
-                <el-button size="small" type="danger" icon="el-icon-delete">delete</el-button>
+                <el-button size="small" type="primary" icon="el-icon-connection" v-if="checkPermission(['admin','Operation'])" :loading=scope.row.pushloading @click="sacleFrom(scope.row)">scale</el-button>
+                <el-button size="small" type="danger" icon="el-icon-delete" v-if="checkPermission(['admin','Operation'])" >delete</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -68,6 +68,7 @@
 <script>
 import { DeleteRealLog,GetRealLog,ScaleNodeGroup,GetNodegroup,getCluster } from '@/api/cd/nodegroup.js'
 import store from '@/store'
+import checkPermission from '@/utils/permission'
 export default {
   data() {
     return {
@@ -93,6 +94,13 @@ export default {
     this.getCluster()
   },
   methods: {
+    checkPermission(roles){
+      if ( this.value.indexOf("dev") == -1 ){
+        return checkPermission(roles)
+      }else{
+        return true
+      }
+    },
     getCluster(){
       getCluster()
         .then(response => {

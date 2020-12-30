@@ -29,7 +29,7 @@ export function fileDownload(pk) {
       method: 'post',
       responseType: 'blob',
   })
-  }
+}
 export function fileUpload(data,pk) {
   var instance = axios.create({
     baseURL: '',
@@ -39,5 +39,11 @@ export function fileUpload(data,pk) {
     }
   });
   return instance.post('/api/api/configfile/'+pk+'/upload/',data)
+}
+export function syncFile(pk) {
+  return request({
+      url: '/api/configfile/'+pk+"/syncFile/",
+      method: 'get',
+  })
 }
 

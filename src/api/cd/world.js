@@ -1,4 +1,7 @@
 import request from '@/utils/request'
+import axios from 'axios'
+import { getToken } from '@/utils/auth'
+
 export function getCluster() {
   return request({
     url: '/api/GetCluster/',
@@ -64,5 +67,41 @@ export function GetWorldStatus(pk) {
   return request({
     url: '/api/world/'+pk+"/status/",
     method: 'get',
+  })
+}
+export function getHistory(pk) {
+  return request({
+    url: '/api/world/'+pk+"/history/",
+    method: 'get',
+  })
+}
+export function RestartApp(pk,data) {
+  return request({
+    url: '/api/world/'+pk+"/restart/",
+    method: 'post',
+    data
+  })
+}
+export function BackupRedis(pk) {
+  return request({
+    url: '/api/world/'+pk+"/backup/",
+    method: 'get',
+  })
+}
+export function UpdateServerList(data) {
+  var instance = axios.create({
+      baseURL: '',
+      headers: {
+      'Content-Type': 'multipart/form-data',
+      'Authorization': "JWT " +getToken(),
+      }
+  });
+  return instance.post('/api/api/world/serverlist/',data)
+}
+export function UpdateSecurityGroup(pk,data) {
+  return request({
+    url: '/api/world/'+pk+"/securitygroup/",
+    method: 'post',
+    data
   })
 }

@@ -21,3 +21,30 @@ export function logout() {
     method: 'post'
   })
 }
+
+
+export function getUser() {
+  return request({
+    url: '/api/users/',
+    method: 'get',
+  })
+}
+export function deleteUser(pk) {
+  return request({
+    url: '/api/users/'+pk+'/',
+    method: 'delete',
+  })
+}
+export function addUser(data) {
+  return request({
+    url: '/api/users/',
+    method: 'post',
+    data
+  })
+}
+export function getGroups(pk,data) {
+  return request({
+    url: '/api/GetGroups/',
+    method: 'get',
+  })
+}

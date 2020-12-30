@@ -21,7 +21,7 @@
             <template slot-scope="scope"> {{ scope.row.created_time }}</template>
           </el-table-column>
           <el-table-column label="操作" align="center" min-width="300px">
-            <template slot-scope="scope" v-if="scope.row.create_user == user_name">
+            <template slot-scope="scope" v-if="checkPermission(scope.row.create_user)">
                 <el-button size="small" type="primary" icon="el-icon-set-up" @click="buildDialog(scope.row.id)">构建</el-button>
                 <el-button size="small" type="primary" icon="el-icon-upload" :loading=scope.row.pushloading @click="pushImage(scope.row)">推送</el-button>
                 <el-button size="small" type="danger" icon="el-icon-delete" @click="deleteConfirm(scope.row.id)">删除</el-button>
@@ -86,6 +86,7 @@
 <script>
 import { getContainer,createContainer,deleteContainer,getEcraddr,buildImage,pushImage,getSvnBranch } from '@/api/ci/cicontainer.js'
 import store from '@/store'
+import checkPermission from '@/utils/permission'
 export default {
   data() {
     return {
@@ -119,6 +120,13 @@ export default {
         let msg = document.getElementById('scroll') // 获取对象
         msg.scrollTop = msg.scrollHeight // 滚动高度
       })
+    },
+    checkPermission(user){
+      if (user == this.user_name){
+        return true
+      }else{
+        return checkPermission(["admin"])
+      }
     },
     getSvnBranch(){
       getSvnBranch()
@@ -226,7 +234,7 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         beforeClose: (action, instance, done) => {
-          if (action === 'confirm') {
+          if (action === 'confirm') {    
             instance.confirmButtonLoading = true;
             instance.confirmButtonText = '执行中...';
             deleteContainer(pk)

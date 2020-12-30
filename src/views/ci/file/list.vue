@@ -42,6 +42,9 @@
           <el-button size="small" type="primary" icon="el-icon-download" @click="fileDownload(scope.row)">
             下载
           </el-button>
+          <el-button size="small" :loading=isSyncLoading type="primary" icon="el-icon-refresh" v-if="scope.row.name=='Dockerfile.prod'" @click="syncFileConfirm(scope.row.id)">
+            同步
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -66,7 +69,7 @@
 </template>
 
 <script>
-import { Filelist,fileUpload,fileDownload } from '@/api/ci/file'
+import { Filelist,fileUpload,fileDownload,syncFile } from '@/api/ci/file'
 
 export default {
   name: 'ArticleList',
@@ -78,6 +81,7 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
+      isSyncLoading: false,
       listQuery: {
         page: 1,
         limit: 20
@@ -95,7 +99,7 @@ export default {
         return false
       }
       var data = new FormData();
-      data.append('file', file);
+      data.append('path', file);
       //这里是我将file作为参数传给了我的接口
       fileUpload(data,this.upload_id)
         .then(response => {
@@ -146,8 +150,37 @@ export default {
         }, response => {
           console.log(response);
         });
-      }
-    }
+      },
+    syncFileConfirm(pk) {
+      this.$confirm('此操作将会把Dockerfile.dev文件复制到Dockerfile.prod文件, 是否继续?', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.isSyncLoading=true;
+        this.syncFile(pk);
+        this.isSyncLoading=false;
+        this.$message({
+          message: 'success sync',
+          type: 'success'
+        });
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消操作'
+        });
+      });
+    },
+    syncFile(pk) {
+      syncFile(pk)
+        .then(response => {
+          console.log(response);
+      }, response => {
+        console.log(response);
+      });
+    },
   }
+}
+  
 </script>
 

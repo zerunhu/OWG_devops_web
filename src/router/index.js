@@ -169,6 +169,12 @@ export const constantRoutes = [
         },
         hidden: true
       },
+      {
+        path: 'test',
+        component: () => import('@/views/nested/test/index'),
+        name: 'test',
+        meta: { title: 'test' },
+      }
     ]
   },
 
@@ -180,54 +186,77 @@ export const asyncRouterMap = [
   {
     path: '/permission',
     component: Layout,
-    name: '权限测试',
+    name: 'Permission',
     alwaysShow: true,
-    meta: { roles: ['admin','huzerun'] , title: "permission", icon: 'test' }, //页面需要的权限
+    meta: { roles: ['admin'] , title: "Permission", icon: 'edit' }, 
     children: [
     { 
-      path: 'index',
-      component: () => import('@/views/nested/menu3/menu1-detail'),
-      name: '权限测试页',
-      meta: { roles: ['admin','huzerun'] , title: "index" }  //页面需要的权限
-    }]
+      path: 'role',
+      component: () => import('@/views/permission/'),
+      name: 'Role Permission',
+      meta: { roles: ['admin'] , title: "Role Permission" } 
+    },
+    { 
+      path: 'role/:id(\\d+)',
+      component: () => import('@/views/permission/detail'),
+      name: 'role详情',
+      meta: { roles: ['admin'] , title: "RoleDetail" },
+      hidden: true
+    },
+  ]
+  },
+  {
+    path: '/user',
+    component: Layout,
+    name: 'User',
+    alwaysShow: true,
+    meta: { roles: ['admin'] , title: "User", icon: 'user' }, 
+    children: [
+    { 
+      path: '',
+      component: () => import('@/views/user/'),
+      name: 'User Manager',
+      meta: { roles: ['admin'] , title: "User Manager" } 
+    },
+  ]
   },
   {
     path: '/integration',
     component: Layout,
     name: 'ci',
     alwaysShow: true,
-    meta: { roles: ['admin','huzerun'] , title: "ContinuousIntegra", icon: 'ci' }, //页面需要的权限
+    meta: { roles: ['admin',"Development","Operation"] , title: "ContinuousIntegra", icon: 'ci' }, //页面需要的权限
     children: [
     { 
       path: 'svn',
       component: () => import('@/views/ci/svn/'),
       name: 'svn测试页面',
-      meta: { roles: ['admin','huzerun'] , title: "Svn List" }  
+      meta: { roles: ['admin',"Development","Operation"] , title: "Svn List" }  
     },
     { 
       path: 'ci',
       component: () => import('@/views/ci/cicontainers/'),
       name: '创建ci_container界面',
-      meta: { roles: ['admin','huzerun'] , title: "CI List" }  
+      meta: { roles: ['admin',"Development","Operation"] , title: "CI List" }  
     },
     { 
       path: 'image',
       component: () => import('@/views/ci/ecr/'),
       name: 'ecr_image信息',
-      meta: { roles: ['admin','huzerun'] , title: "Image List" }  
+      meta: { roles: ['admin',"Development","Operation"] , title: "Image List" }  
     },
     { 
       path: 'file/edit/:id(\\d+)',
       component: () => import('@/views/ci/file/edit'),
       name: 'config详情修改',
-      meta: { roles: ['admin','huzerun'] , title: "File" },
+      meta: { roles: ['admin',"Development","Operation"] , title: "File" },
       hidden: true
     },
     {
       path: 'file/list',
       component: () => import('@/views/ci/file/list'),
       name: 'config_file列表',
-      meta: { title: 'Config List' }
+      meta: { roles: ['admin',"Development","Operation"] , title: 'Config List' }
     }
     ]
   },
@@ -236,31 +265,31 @@ export const asyncRouterMap = [
     component: Layout,
     name: 'cd',
     alwaysShow: true,
-    meta: { roles: ['admin','huzerun'] , title: "ContinuousDeploy", icon: 'cd' }, //页面需要的权限
+    meta: { roles: ['admin',"Development","Operation"] , title: "ContinuousDeploy", icon: 'cd' }, //页面需要的权限
     children: [
     { 
       path: 'cluster',
       component: () => import('@/views/cd/cluster/'),
       name: 'cluster',
-      meta: { roles: ['admin','huzerun'] , title: "Cluster List" }  
+      meta: { roles: ['admin',"Development","Operation"] , title: "Cluster List" }  
     },
     { 
       path: 'nodegroup',
       component: () => import('@/views/cd/nodegroup/'),
       name: 'nodegroup',
-      meta: { roles: ['admin','huzerun'] , title: "Nodegroup List" }  
+      meta: { roles: ['admin',"Development","Operation"] , title: "Nodegroup List" }  
     },
     { 
       path: 'world',
       component: () => import('@/views/cd/world/'),
       name: 'world',
-      meta: { roles: ['admin','huzerun'] , title: "World List" }  
+      meta: { roles: ['admin',"Development","Operation"] , title: "World List" }  
     },
     { 
       path: 'world/:id(\\d+)',
       component: () => import('@/views/cd/world/detail'),
       name: 'world详情',
-      meta: { roles: ['admin','huzerun'] , title: "World Detail" },
+      meta: { roles: ['admin',"Development","Operation"] , title: "World Detail" },
       hidden: true
     },
     ]
