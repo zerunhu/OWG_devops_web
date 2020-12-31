@@ -1,5 +1,12 @@
 <template>
   <div class="app-container" >
+    <aside>
+      <strong>ServerList Name: </strong>{{ file_name }}
+      <br>
+      You can 
+      <a :href='file_url' target="_blank">click</a>
+      to download the latest json file in aws
+    </aside>
     <el-row>
         <el-table v-loading="tableloading" :data="serverlist" border fit highlight-current-row style="width: 100%" >
           <el-table-column label="id" align="center" min-width="120px">
@@ -83,6 +90,8 @@ export default {
     return {
       serverlist: [],
       host_path: "",
+      file_name: "",
+      file_url: "",
       tableloading: true,
       dialogEditFormVisible: false,
       dialogEditRow: "",
@@ -100,6 +109,8 @@ export default {
         .then(response => {
           this.serverlist = response.serverlist
           this.host_path = response.file
+          this.file_name = this.host_path.split("/")[3]
+          this.file_url = "https://d3uh30nzjjnhcl.cloudfront.net/"+this.file_name
           this.tableloading = false
           console.log(response);
       }, response => {

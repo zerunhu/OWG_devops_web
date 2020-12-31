@@ -271,26 +271,26 @@ export const asyncRouterMap = [
       path: 'cluster',
       component: () => import('@/views/cd/cluster/'),
       name: 'cluster',
-      meta: { roles: ['admin',"Development","Operation"] , title: "Cluster List" }  
+      meta: { roles: ['admin',"Development","Operation"] , title: "Cluster" }  
     },
     { 
       path: 'nodegroup',
       component: () => import('@/views/cd/nodegroup/'),
       name: 'nodegroup',
-      meta: { roles: ['admin',"Development","Operation"] , title: "Nodegroup List" }  
+      meta: { roles: ['admin',"Development","Operation"] , title: "Nodegroup" }  
     },
     { 
       path: 'world',
-      component: () => import('@/views/cd/world/'),
+      component: () => import('@/views/cd/world/index'),
       name: 'world',
-      meta: { roles: ['admin',"Development","Operation"] , title: "World List" }  
+      meta: { roles: ['admin',"Development","Operation"] , title: "World" },
     },
     { 
       path: 'world/serverlist',
       component: () => import('@/views/cd/world/serverlist'),
       name: 'world_serverlist',
-      meta: { roles: ['admin',"Development","Operation"] , title: "World ServerList" },
-      hidden: true
+      meta: { roles: ['admin',"Development","Operation"] , title: "ServerList"},
+      hidden: true,
     },
     ]
   },
