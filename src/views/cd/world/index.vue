@@ -163,6 +163,7 @@
         <div slot="tip" class="el-upload__tip" style="font-size:16px;margin-top:10px;">只能上传文件，且不超过1mb</div>
       </el-upload>
       <div slot="footer" class="dialog-footer"  style="margin-top: -15px;">
+        <router-link style="margin-right:15px" :to="{path:'/deploy/world/serverlist/',query:{cluster_name:this.value}}"><el-button type="primary">在线编辑</el-button></router-link>
         <el-button type="primary" :loading=isUploadLoading @click="submitUpload">Update</el-button>
       </div>
     </el-dialog>
@@ -449,11 +450,13 @@ export default {
 
     /// update serverlist
     beforePicUpload (file) {
+      console.log("3333333333333333333333333")
       const isLt1M = file.size / 1024 / 1024 < 1
       if (!isLt1M) {
         this.$message.error('上传文件大小不能超过 1MB!')
         return false
       }
+      console.log("4444444444444444444444444")
       var data = new FormData();
       data.append('file', file);
       data.append('cluster', this.value);
@@ -482,6 +485,14 @@ export default {
       return false
     },
     submitUpload() {
+      console.log(this.fileList)
+      if (this.fileList == 0){
+        this.$message({
+          type: 'error',
+          message: '请选择文件'
+        });
+        return false
+      }
       this.isUploadLoading = true
       this.$refs.upload.submit();
     },

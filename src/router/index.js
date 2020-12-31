@@ -286,10 +286,10 @@ export const asyncRouterMap = [
       meta: { roles: ['admin',"Development","Operation"] , title: "World List" }  
     },
     { 
-      path: 'world/:id(\\d+)',
-      component: () => import('@/views/cd/world/detail'),
-      name: 'world详情',
-      meta: { roles: ['admin',"Development","Operation"] , title: "World Detail" },
+      path: 'world/serverlist',
+      component: () => import('@/views/cd/world/serverlist'),
+      name: 'world_serverlist',
+      meta: { roles: ['admin',"Development","Operation"] , title: "World ServerList" },
       hidden: true
     },
     ]

@@ -105,3 +105,17 @@ export function UpdateSecurityGroup(pk,data) {
     data
   })
 }
+export function getServerlistoffline(cluster_name) {
+  return request({
+    url: '/api/world/serverlistoffline/',
+    method: 'get',
+    params: { cluster: cluster_name }
+  })
+}
+export function updateServerlistoffline(data) {
+  return request({
+    url: '/api/world/updateserverlistoffline/',
+    method: 'post',
+    data
+  })
+}
