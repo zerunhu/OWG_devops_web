@@ -54,8 +54,8 @@
             <el-option
               v-for="item in groups"
               :key="item"
-              :label="item"
-              :value="item">
+              :label="item.name"
+              :value="item.name">
             </el-option>
           </el-select>
         </el-form-item>

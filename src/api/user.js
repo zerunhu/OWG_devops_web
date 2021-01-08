@@ -9,7 +9,7 @@ export function login(data) {
 
 export function getInfo(token) {
   return request({
-    url: '/api/user/info',
+    url: '/api/users/info',
     method: 'get',
     params: { token: token }
   })
@@ -42,9 +42,9 @@ export function addUser(data) {
     data
   })
 }
-export function getGroups(pk,data) {
+export function getGroups() {
   return request({
-    url: '/api/GetGroups/',
+    url: '/api/role/',
     method: 'get',
   })
 }

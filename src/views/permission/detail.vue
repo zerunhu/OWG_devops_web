@@ -36,8 +36,8 @@
             <el-option
               v-for="item in users"
               :key="item"
-              :label="item"
-              :value="item">
+              :label="item.username"
+              :value="item.username">
             </el-option>
           </el-select>
         </el-form-item>

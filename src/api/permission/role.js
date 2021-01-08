@@ -38,9 +38,9 @@ export function addUser(pk,data) {
     data
   })
 }
-export function getAllusers(pk,data) {
+export function getAllusers() {
   return request({
-    url: '/api/GetUsers/',
+    url: '/api/users/',
     method: 'get',
   })
 }
