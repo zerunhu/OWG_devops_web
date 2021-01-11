@@ -88,15 +88,23 @@ export function BackupRedis(pk) {
     method: 'get',
   })
 }
+// export function UpdateServerList(data) {
+//   var instance = axios.create({
+//       baseURL: '',
+//       headers: {
+//       'Content-Type': 'multipart/form-data',
+//       'Authorization': "JWT " +getToken(),
+//       }
+//   });
+//   return instance.post('/api/api/world/serverlist/',data)
+// }
 export function UpdateServerList(data) {
-  var instance = axios.create({
-      baseURL: '',
-      headers: {
-      'Content-Type': 'multipart/form-data',
-      'Authorization': "JWT " +getToken(),
-      }
-  });
-  return instance.post('/api/api/world/serverlist/',data)
+  return request({
+    url: '/api/world/serverlist/',
+    method: 'post',
+    headers: {'Content-Type': 'multipart/form-data'},
+    data
+  })
 }
 export function UpdateSecurityGroup(pk,data) {
   return request({
@@ -118,4 +126,4 @@ export function updateServerlistoffline(data) {
     method: 'post',
     data
   })
-}
+} 
