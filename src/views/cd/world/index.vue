@@ -156,6 +156,7 @@
         class="upload-demo"
         ref="upload"
         action=""
+        :on-change = "updatefilechange"
         :before-upload="beforePicUpload"
         :auto-upload="false">
         <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
@@ -177,6 +178,7 @@ import checkPermission from '@/utils/permission'
 export default {
   data() {
     return {
+      fileList: [],
       checkedApps: ['map', 'stateless', 'center', 'gate', 'logic'],
       apps: ['map', 'stateless', 'center', 'gate', 'logic', 'redis'],
       isIndeterminate: true,
@@ -447,6 +449,9 @@ export default {
     },
 
     /// update serverlist
+    updatefilechange(file, fileList){
+      this.fileList = fileList  
+    },
     beforePicUpload (file) {
       const isLt1M = file.size / 1024 / 1024 < 1
       if (!isLt1M) {
@@ -481,6 +486,13 @@ export default {
       return false
     },
     submitUpload() {
+      if (this.fileList == 0){  //验证filelist是否长度为0，为0就会报错
+        this.$message({
+          type: 'error',
+          message: '请选择文件'
+        });
+        return false
+      }
       this.isUploadLoading = true
       this.$refs.upload.submit();
     },

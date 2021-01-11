@@ -113,16 +113,16 @@ export function UpdateSecurityGroup(pk,data) {
     data
   })
 }
-export function getServerlistoffline(cluster_name) {
+export function getServerlistonline(cluster_name) {
   return request({
-    url: '/api/world/serverlistoffline/',
+    url: '/api/world/serverlistonline/',
     method: 'get',
     params: { cluster: cluster_name }
   })
 }
-export function updateServerlistoffline(data) {
+export function updateServerlistonline(data) {
   return request({
-    url: '/api/world/updateserverlistoffline/',
+    url: '/api/world/updateserverlistonline/',
     method: 'post',
     data
   })

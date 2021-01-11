@@ -78,13 +78,13 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogEditFormVisible = false; dialogDestry('编辑')">取 消</el-button>
-        <el-button type="primary" :loading=isUpdateLoading @click="updateServerlistoffline()">更新</el-button>
+        <el-button type="primary" :loading=isUpdateLoading @click="updateServerlistonline()">更新</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
-import { getServerlistoffline,updateServerlistoffline } from '@/api/cd/world'
+import { getServerlistonline,updateServerlistonline } from '@/api/cd/world'
 export default {
   data() {
     return {
@@ -101,11 +101,11 @@ export default {
     }
   },
   mounted: function () {
-    this.getServerlistoffline()
+    this.getServerlistonline()
   },
   methods:{
-    getServerlistoffline() {
-      getServerlistoffline(this.$route.query.cluster_name)
+    getServerlistonline() {
+      getServerlistonline(this.$route.query.cluster_name)
         .then(response => {
           this.serverlist = response.serverlist
           this.host_path = response.file
@@ -121,9 +121,9 @@ export default {
       this.dialogEditRow = row
       this.dialogEditFormVisible = true
     },
-    updateServerlistoffline() {
+    updateServerlistonline() {
       this.isUpdateLoading = true
-      updateServerlistoffline({"host_path":this.host_path,"cluster_name":this.$route.query.cluster_name,"serverlist":this.dialogEditRow})
+      updateServerlistonline({"host_path":this.host_path,"cluster_name":this.$route.query.cluster_name,"serverlist":this.dialogEditRow})
         .then(response => {
           this.dialogEditFormVisible = false
           this.isUpdateLoading = false
