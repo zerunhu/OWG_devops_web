@@ -3,9 +3,9 @@
     <aside>
       <strong>ServerList Name: </strong>{{ file_name }}
       <br>
-      You can 
-      <a :href='file_url' target="_blank">click</a>
-      to download the latest json file in aws
+      You can click
+      <a :href='file_url' target="_blank">here</a>
+      to download the serverlist file in aws
     </aside>
     <el-row>
         <el-table v-loading="tableloading" :data="serverlist" border fit highlight-current-row style="width: 100%" >
@@ -105,12 +105,19 @@ export default {
   },
   methods:{
     getServerlistonline() {
-      getServerlistonline(this.$route.query.cluster_name)
+      getServerlistonline(this.$route.query.cluster_name,this.$route.query.serverlist_version)
         .then(response => {
-          this.serverlist = response.serverlist
-          this.host_path = response.file
-          this.file_name = this.host_path.split("/")[3]
-          this.file_url = "https://d3uh30nzjjnhcl.cloudfront.net/"+this.file_name
+          if(response.status != 500){
+            this.serverlist = response.serverlist
+            this.host_path = response.file
+            this.file_name = this.host_path.split("/")[3]
+            this.file_url = "https://d3uh30nzjjnhcl.cloudfront.net/"+this.file_name
+          }else{
+            this.$message({
+              type: 'error',
+              message: response.message
+            });
+          }
           this.tableloading = false
           console.log(response);
       }, response => {

@@ -117,12 +117,6 @@ export default {
     submitUpload() {
       this.$refs.upload.submit();
     },
-    // handleRemove(file, fileList) {
-    //   console.log(file, fileList);
-    // },
-    // handlePreview(file) {
-    //   console.log(file);
-    // },
     Filelist() {
       this.listLoading = true
       Filelist()

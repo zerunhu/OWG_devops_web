@@ -30,15 +30,13 @@ export function fileDownload(pk) {
       responseType: 'blob',
   })
 }
-export function fileUpload(data,pk) {
-  var instance = axios.create({
-    baseURL: '',
-    headers: {
-      'Content-Type': 'multipart/form-data',
-      'Authorization': "JWT " +getToken(),
-    }
-  });
-  return instance.post('/api/api/configfile/'+pk+'/upload/',data)
+export function UpdateServerList(data,pk) {
+  return request({
+    url: '/api/configfile/'+pk+'/upload/',
+    method: 'post',
+    headers: {'Content-Type': 'multipart/form-data'},
+    data
+  })
 }
 export function syncFile(pk) {
   return request({

@@ -12,7 +12,10 @@
         <el-button size="medium" type="primary" icon="el-icon-copy-document" v-if="checkPermission(['admin','Operation'])" @click="dialogCreateFormVisible=true" style="height:40px;" >{{ create_Value }}</el-button>
     </el-row>
     <el-row style="float:right;margin-top: 15px;margin-right:35px;"  v-if="value=='firestrike-oregon-prod-2'">
-        <el-button size="medium" type="primary" icon="el-icon-upload" @click="dialogUploadVisible=true" v-if="checkPermission(['admin','Operation']) && paneActiveName=='world'" style="height:40px;">serverlist</el-button>
+        <el-button size="medium" type="primary" icon="el-icon-upload" @click="dialogServerlistVisible=true" v-if="checkPermission(['admin','Operation']) && paneActiveName=='world'" style="height:40px;">serverlist</el-button>
+    </el-row>
+    <el-row style="float:right;margin-top: 15px;margin-right:35px;"  v-if="value=='firestrike-oregon-prod-2'">
+        <el-button size="medium" type="primary" icon="el-icon-upload" @click="dialogNoticeVisible=true" v-if="checkPermission(['admin','Operation']) && paneActiveName=='world'" style="height:40px;">notice</el-button>
     </el-row>
     <el-tabs style="margin-top: 10px" type="card" v-model="paneActiveName" @tab-click="handleClick">
       <el-tab-pane label="world" name="world"></el-tab-pane>
@@ -151,7 +154,7 @@
       </div>
     </el-dialog>
     <!-- serverlist update dialog -->
-    <el-dialog title="Update ServerList" :visible.sync="dialogUploadVisible" width="40%">
+    <el-dialog title="Update ServerList" :visible.sync="dialogServerlistVisible" width="40%" :closeOnClickModal=false>
       <el-upload
         class="upload-demo"
         ref="upload"
@@ -163,8 +166,39 @@
         <div slot="tip" class="el-upload__tip" style="font-size:16px;margin-top:10px;">只能上传文件，且不超过1mb</div>
       </el-upload>
       <div slot="footer" class="dialog-footer"  style="margin-top: -15px;">
-        <router-link style="margin-right:15px" :to="{path:'/deploy/world/serverlist/',query:{cluster_name:this.value}}"><el-button type="primary">在线编辑</el-button></router-link>
-        <el-button type="primary" :loading=isUploadLoading @click="submitUpload">Update</el-button>
+        <el-button type="primary" @click="dialogEditonlineVisible=true;dialogServerlistVisible=false">在线编辑</el-button>
+        <el-button type="primary" :loading=isServerlistLoading @click="submitUpload">Update</el-button>
+      </div>
+    </el-dialog>
+    <!-- serverlist update editonline dialog -->
+    <el-dialog title="Update ServerList" :visible.sync="dialogEditonlineVisible" width="40%" :closeOnClickModal=false>
+      <el-form :model="online_serverlist" :rules="rules"> 
+        <el-form-item label="version" label-width="80px" prop="version" :validate-event="false">
+          <el-input v-model="online_serverlist.version" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <p style="margin-top: 5px;margin-left: 15px;"> 请填写需要修改的客户端版本号 </p>
+      <br>
+      <p style="margin-top: -20px;margin-left: 15px;color:red">格式: x.x.x  (x表示为数字)</p>
+      <div slot="footer" class="dialog-footer"  style="margin-top: -35px;">
+        <router-link style="margin-right:15px" :to="{path:'/deploy/world/serverlist/',query:{cluster_name:this.value,serverlist_version:this.online_serverlist.version}}"><el-button type="primary">确认</el-button></router-link>
+      </div>
+    </el-dialog>
+    <!-- notice update dialog -->
+    <el-dialog title="Update Notice" :visible.sync="dialogNoticeVisible" width="40%" :closeOnClickModal=false>
+      <el-form :model="notice" :rules="rules">
+        <el-form-item label="old_version" label-width="110px" prop="old_version">
+          <el-input v-model="notice.old_version" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="new_version" label-width="110px" prop="new_version">
+          <el-input v-model="notice.new_version"></el-input>
+        </el-form-item>
+      </el-form>
+      <p style="margin-top: 5px;margin-left: 15px;">请填写客户端版本号，玩家在打开旧版本客户端时弹出提示，要求玩家升级到新版本</p>
+      <br>
+      <p style="margin-top: -10px;margin-left: 15px;color:red">格式: x.x.x  (x表示为数字)</p>
+      <div slot="footer" class="dialog-footer"  style="margin-top: -35px;">
+        <el-button type="primary" :loading=isNoticeLoading @click="updateNotice">Update</el-button>
       </div>
     </el-dialog>
   </div>
@@ -172,13 +206,36 @@
 </template>
 
 <script>
-import { getCluster,getWorld,createWorld,getImages,updateWorld,deleteWorld,GetRealLog,DeleteRealLog,GetWorldStatus,getHistory,RestartApp,BackupRedis,UpdateSecurityGroup,UpdateServerList } from '@/api/cd/world.js'
+import { getCluster,getWorld,createWorld,getImages,updateWorld,deleteWorld,GetRealLog,DeleteRealLog,GetWorldStatus,getHistory,RestartApp,BackupRedis,UpdateSecurityGroup,UpdateServerList,updateNotice } from '@/api/cd/world.js'
 import store from '@/store'
 import checkPermission from '@/utils/permission'
 export default {
   data() {
+    let reg = /^\d+\.\d+\.\d+$/
+    var checkVersion = (rule, value, callback) => {
+      console.log(value)
+      if (!reg.test(value)) {
+          callback(new Error('请按照格式规定输入version'))
+      } else {
+          callback()
+      }
+    }
     return {
+      rules:{
+        old_version: [
+          { validator: checkVersion, trigger: 'blur' }
+        ], 
+        new_version: [
+          { validator: checkVersion, trigger: 'blur' }
+        ], 
+        version: [
+          { validator: checkVersion, trigger: 'blur' }
+        ], 
+      },
       fileList: [],
+      online_serverlist: {
+        version: "",
+      },
       checkedApps: ['map', 'stateless', 'center', 'gate', 'logic'],
       apps: ['map', 'stateless', 'center', 'gate', 'logic', 'redis'],
       isIndeterminate: true,
@@ -202,6 +259,10 @@ export default {
         world_id: "",
         label_name: "world_name",
       },
+      notice: {
+        old_version: "",
+        new_version: "",
+      },
       ImageList: "",
       formLabelWidth: '80px',
       path: "",
@@ -213,8 +274,11 @@ export default {
       dialogHistoryFormVisible: false,
       dialogRestartFormVisible: false,
       isRestartLoading: false,
-      dialogUploadVisible: false,
-      isUploadLoading: false,
+      dialogServerlistVisible: false,
+      dialogNoticeVisible: false,
+      isServerlistLoading: false,
+      dialogEditonlineVisible: false,
+      isNoticeLoading: false,
       isSecurityGroupLoading: false,
     }
   },
@@ -464,10 +528,10 @@ export default {
       //这里是我将file作为参数传给了我的接口
       UpdateServerList(data)
         .then(response => {
-          if (response.data.status == 500){
+          if (response.status == 500){
             this.$message({
               type: 'error',
-              message: response.data.message
+              message: response.message
             });
           }else{
             this.$message({
@@ -475,12 +539,12 @@ export default {
               type: 'success'
             })
           }
-          this.isUploadLoading=false
-          this.dialogUploadVisible=false
+          this.isServerlistLoading=false
+          this.dialogServerlistVisible=false
           console.log(response);
       }, response => {
-        this.isUploadLoading=false
-        this.dialogUploadVisible=false
+        this.isServerlistLoading=false
+        this.dialogServerlistVisible=false
         console.log(response);
       });
       return false
@@ -493,10 +557,37 @@ export default {
         });
         return false
       }
-      this.isUploadLoading = true
+      this.isServerlistLoading = true
       this.$refs.upload.submit();
     },
-    
+
+
+    //update notice
+    updateNotice(){
+      this.isNoticeLoading = true;
+      updateNotice({"cluster": this.value,"old_version": this.notice.old_version,"new_version": this.notice.new_version})
+      .then(response => {
+        if (response.status == 500){
+          this.$message({
+            type: 'error',
+            message: response.message
+          });
+        }else{
+          this.$message({
+            type: 'success',
+            message: '更新成功'
+          });
+        }
+        this.isNoticeLoading = false;
+        this.dialogNoticeVisible = false;
+        console.log(response);
+      }, response => {
+        this.isNoticeLoading = false;
+        this.dialogNoticeVisible = false;
+        console.log(response);
+      })
+    },
+
     //open/close security group
     ConfirmPortOpen(row){
       this.$prompt('请确认服务器需要'+ (row.port_open=== true ?'关闭':'开启')+'此服务器的aws对外映射端口！ 请输入需要更新的服务器名称确认关闭。 ', '警告', {
