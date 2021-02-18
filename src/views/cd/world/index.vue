@@ -22,14 +22,14 @@
       <el-tab-pane label="global" name="global"></el-tab-pane>
     </el-tabs>
     <el-row style="margin-top: -16px">
-        <el-table :data="tableDataList" border fit highlight-current-row style="width: 100%" :default-sort = "{prop: 'name', order: 'ascending'}">
-          <el-table-column label="name" align="center" min-width="100px" :sortable=true prop="name" :sort-method="sortByName">
+        <el-table :data="tableDataList" border fit highlight-current-row style="width: 100%">
+          <el-table-column label="name" align="center" min-width="100px">
             <template slot-scope="scope"> {{ scope.row.name  }} </template>
           </el-table-column>
           <!-- <el-table-column label="cluster" align="center" min-width="200px">
             <template> {{ value }} </template>
           </el-table-column> -->
-          <el-table-column label="create_time" align="center" min-width="120px" :sortable=true prop="date"> 
+          <el-table-column label="create_time" align="center" min-width="120px" sortable prop="create_time"> 
             <template slot-scope="scope"> {{ scope.row.create_time.split(".")[0] }}</template>
           </el-table-column>
           <el-table-column label="update_time" align="center" min-width="120px">
@@ -674,6 +674,7 @@ export default {
     sortByName(obj1, obj2) {
       let val1 = obj1.sortsplit
       let val2 = obj2.sortsplit
+      console.log(val1,val2)
       return val1 - val2
     },
 
