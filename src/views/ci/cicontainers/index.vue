@@ -1,7 +1,7 @@
 <template>
   <div class="app-container" >
     <el-row>
-        <el-button size="medium" type="primary" icon="el-icon-download" @click="dialogbranchVisible=true;getSvnBranch()" style="float:left; margin: 2px;">同步代码</el-button>
+        <el-button size="medium" type="primary" icon="el-icon-download" @click="dialogbranchVisible=true;" style="float:left; margin: 2px;">同步代码</el-button>
     </el-row>
     <el-row style="margin-top: 10px">
         <el-table :data="containerList" border fit highlight-current-row style="width: 100%" >
@@ -31,16 +31,9 @@
     </el-row>
 
     <el-dialog title="Branch" :visible.sync="dialogbranchVisible" width="40%" :closeOnClickModal=false :showClose=false>
-      <el-form :model="branchForm">
+      <el-form>
         <el-form-item label="branch" label-width="110px">
-          <el-select style="width:220px;" filterable  v-model="branchForm.branch" placeholder="请选择分支">
-            <el-option
-              v-for="item in branchList"
-              :key="item"
-              :label="item"
-              :value="item">
-            </el-option>
-          </el-select>
+          <el-cascader :show-all-levels="false" v-model="branch" :props="cascaderBranch" :options="options"></el-cascader>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -90,6 +83,7 @@ import checkPermission from '@/utils/permission'
 export default {
   data() {
     return {
+      branch: "",
       containerList:[],
       EcraddrList: [],
       branchList: [],
@@ -103,11 +97,42 @@ export default {
         id: "",
         ecraddr: "",
       },
-      branchForm: {
-        branch: "",
-      },
+      // branchForm: {
+      //   branch: "",
+      // },
       dialogbranchVisible: false,
-      buildloading: false
+      buildloading: false,
+      options: [{
+          value: 'trunk/TheWar-Server/',
+          label: 'trunk/TheWar-Server/',
+          leaf: true,
+      },{
+          value: 'tags/',
+          label: 'tags/',
+      },{
+          value: 'branches/',
+          label: 'branches/',
+      }, 
+      ],
+      cascaderBranch: {
+        lazy: true,
+        lazyLoad (node, resolve) {
+          if (node.level > 0) {
+            getSvnBranch(node.value)
+            .then(res => {
+                const nodes = res.map((value, i) => ({
+                    value: value,
+                    label: value,
+                    leaf: node.level >= 2
+                }));
+                resolve(nodes);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+          }
+        }
+      },
     }
   },
   mounted: function () {
@@ -127,14 +152,6 @@ export default {
       }else{
         return checkPermission(["admin"])
       }
-    },
-    getSvnBranch(){
-      getSvnBranch()
-        .then(response => {
-          this.branchList=response 
-        }, response => {
-          console.log(response);
-        }) 
     },
     getEcraddr(){
       getEcraddr()
@@ -206,7 +223,7 @@ export default {
     },
     createContainer() {
       this.createLoading=true
-      createContainer({branch: this.branchForm.branch})
+      createContainer({branch: this.branch[this.branch.length-1]})
         .then(response => {
         if (response.status == 200){
             this.createLoading = false,
@@ -227,6 +244,9 @@ export default {
         }
         });
     },
+    // createContainer() {
+    //   console.log(this.branch[this.branch.length-1])
+    // },
 
     deleteConfirm(pk) {
       this.$confirm('此操作将永久删除该容器, 是否继续?', '提示', {

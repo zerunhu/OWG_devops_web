@@ -1,74 +1,85 @@
 <template>
-  <div class="app-container">
-
-    <el-button size="small" type="primary" icon="el-icon-upload" @click="dialogUploadVisible=true">
-            上传
-    </el-button>
-
-    <el-dialog title="文件上传" :visible.sync="dialogUploadVisible" width="40%">
-      <el-upload
-        class="upload-demo"
-        ref="upload"
-        action=""
-        :before-upload="beforePicUpload"
-        :show-file-list=false
-        :file-list="fileList"
-        :auto-upload="false">
-        <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-        <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
-        <div slot="tip" class="el-upload__tip" style="font-size:16px">只能上传文件，且不超过1mb</div>
-      </el-upload>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogUploadVisible = false">关 闭</el-button>
-      </span>
-    </el-dialog>
-
+  <div>
+    <el-card class="box-card m-t-10" shadow="hover">
+      <div slot="header">
+        <el-row type="flex" justify="space-between">
+            <el-col :span="12">
+                <el-button size="mini">批量删除</el-button>
+            </el-col>
+        </el-row>
+      </div>
+      <el-table border fit 
+        :data="tableData"
+        tooltip-effect="dark"
+        style="width: 100%"
+        @selection-change="handleSelectionChange">
+        <el-table-column
+          type="selection"
+          width="55">
+        </el-table-column>
+        <el-table-column
+          label="日期"
+          width="120">
+          <template slot-scope="scope">{{ scope.row.date }}</template>
+        </el-table-column>
+        <el-table-column
+          prop="name"
+          label="姓名"
+          width="120">
+        </el-table-column>
+        <el-table-column
+          prop="address"
+          label="地址">
+        </el-table-column>
+      </el-table>
+    </el-card>
   </div>
+  
+
 </template>
 
 <script>
-import { fileUpload } from '@/api/test'
-
-export default {
-  name: 'ArticleList',
-  data() {
-    return {
-      dialogUploadVisible: false,
-      list: null,
-      fileList: [{name: 'food.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}]
-    }
-  },
-  methods: {
-    beforePicUpload (file) {
-      const isLt1M = file.size / 1024 / 1024 < 1
-      if (!isLt1M) {
-        this.$message.error('上传文件大小不能超过 1MB!')
-        return false
+  export default {
+    data() {
+      return {
+        tableData: [{
+          date: '2016-05-03',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1518 弄'
+        }, {
+          date: '2016-05-02',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1518 弄'
+        }, {
+          date: '2016-05-04',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1518 弄'
+        }, {
+          date: '2016-05-01',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1518 弄'
+        }, {
+          date: '2016-05-08',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1518 弄'
+        }, {
+          date: '2016-05-06',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1518 弄'
+        }, {
+          date: '2016-05-07',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1518 弄'
+        }],
+        multipleSelection: []
       }
-      var data = new FormData();
-      data.append('file', file);
-      data.append('cluster', this.value);
-      console.log(data)
-      //这里是我将file作为参数传给了我的接口
-      fileUpload(data)
-        .then(response => {
-          this.$message({
-            message: '上传成功',
-            type: 'success'
-          })
-          this.dialogUploadVisible=false
-          console.log(response);
-      }, response => {
-        console.log(response);
-      });
-      return false
     },
-    submitUpload() {
-      console.log(this.fileList)
-      this.$refs.upload.submit();
-    },
-  }
-}
-  
-</script>
 
+    methods: {
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+        console.log(this.multipleSelection[1].address)
+      }
+    }
+  }
+</script>

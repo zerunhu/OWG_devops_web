@@ -17,7 +17,7 @@
       <el-tab-pane label="us-west-2" name="us-west-2"></el-tab-pane>
     </el-tabs>
     <el-row style="margin-top: -16px">
-        <el-table :data="TagList" border fit highlight-current-row  style="width: 100%" >
+        <el-table :data="TagList.slice((currentPage-1)*page_size,currentPage*page_size)" border fit highlight-current-row  style="width: 100%" >
           <el-table-column label="镜像名称" align="center" min-width="200">
             <template > {{ value }} </template>
           </el-table-column>
@@ -36,6 +36,16 @@
             </template>
           </el-table-column>
         </el-table>
+        <div class="block" style="margin-left:30%">
+          <el-pagination
+            :hide-on-single-page=false
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            layout="prev, pager, next"
+            :page-size=page_size
+            :total="TagList.length">
+          </el-pagination>
+        </div>
     </el-row>
   </div>
 </template>
@@ -44,6 +54,8 @@ import { GetEcrImages,GetEcrTags } from '@/api/ci/ecr'
 export default {
   data() {
     return {
+      currentPage:1,
+      page_size:10,
       paneActiveName: "ap-southeast-1",
       ImageList:[],
       TagList:[],
@@ -74,6 +86,10 @@ export default {
       }, response => {
         this.$message('请求失败');
       });
+    },
+    handleCurrentChange(val) {
+      // console.log(`当前页: ${val}`);
+      this.currentPage = val
     },
   }
 }

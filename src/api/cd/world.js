@@ -29,10 +29,10 @@ export function getImages(cluster) {
     params: { cluster: cluster }
   })
 }
-export function updateWorld(pk,data) {
+export function updateWorld(data) {
   return request({
-    url: '/api/world/'+pk+'/',
-    method: 'put',
+    url: '/api/world/batchUpdate/',
+    method: 'post',
     data
   })
 }
@@ -82,10 +82,11 @@ export function RestartApp(pk,data) {
     data
   })
 }
-export function BackupRedis(pk) {
+export function BackupRedis(data) {
   return request({
-    url: '/api/world/'+pk+"/backup/",
-    method: 'get',
+    url: '/api/world/batchBackup/',
+    method: 'post',
+    data
   })
 }
 // export function UpdateServerList(data) {
@@ -132,5 +133,12 @@ export function updateNotice(data) {
     url: '/api/world/notice/',
     method: 'post',
     data
+  })
+} 
+export function operateHistory(type,cluster) {
+  return request({
+    url: '/api/world/operateHistory/',
+    method: 'get',
+    params: { type: type, cluster:cluster }
   })
 } 

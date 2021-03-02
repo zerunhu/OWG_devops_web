@@ -9,34 +9,44 @@
         </el-option>
     </el-select>
     <el-row style="float:right;margin-top: 15px;margin-right:25px;"  v-if="value!=''">
-        <el-button size="medium" type="primary" icon="el-icon-copy-document" v-if="checkPermission(['admin','Operation'])" @click="dialogCreateFormVisible=true" style="height:40px;" >{{ create_Value }}</el-button>
+        <el-button size="medium" type="primary" icon="el-icon-copy-document" v-if="checkPermission(['admin','Operation'])" @click="createForm.dialogCreateFormVisible=true" style="height:40px;" >New world</el-button>
     </el-row>
     <el-row style="float:right;margin-top: 15px;margin-right:35px;"  v-if="value=='firestrike-oregon-prod-2'">
-        <el-button size="medium" type="primary" icon="el-icon-upload" @click="dialogServerlistVisible=true" v-if="checkPermission(['admin','Operation']) && paneActiveName=='world'" style="height:40px;">serverlist</el-button>
+        <el-button size="medium" type="primary" icon="el-icon-upload" @click="serverlist.dialogServerlistVisible=true" v-if="checkPermission(['admin','Operation'])" style="height:40px;">serverlist</el-button>
     </el-row>
     <el-row style="float:right;margin-top: 15px;margin-right:35px;"  v-if="value=='firestrike-oregon-prod-2'">
-        <el-button size="medium" type="primary" icon="el-icon-upload" @click="dialogNoticeVisible=true" v-if="checkPermission(['admin','Operation']) && paneActiveName=='world'" style="height:40px;">notice</el-button>
+        <el-button size="medium" type="primary" icon="el-icon-upload" @click="notice.dialogNoticeVisible=true" v-if="checkPermission(['admin','Operation'])" style="height:40px;">notice</el-button>
     </el-row>
-    <el-tabs style="margin-top: 10px" type="card" v-model="paneActiveName" @tab-click="handleClick">
+    <!-- <el-tabs style="margin-top: 10px" type="card" v-model="paneActiveName" @tab-click="handleClick">
       <el-tab-pane label="world" name="world"></el-tab-pane>
       <el-tab-pane label="global" name="global"></el-tab-pane>
-    </el-tabs>
-    <el-row style="margin-top: -16px">
-        <el-table :data="tableDataList" border fit highlight-current-row style="width: 100%">
+    </el-tabs> -->
+    <el-card class="box-card" shadow="hover" style="margin-top:20px" :body-style="{ padding: '10px' }">
+      <el-button size="small"  icon="el-icon-odometer" v-if="checkPermission(['admin','Operation']) && value != ''" @click="beforeUpdate()">Upgrade</el-button>
+      <el-button size="small"  icon="el-icon-document-copy" v-if="checkPermission(['admin','Operation']) && value != ''" @click="beforeBackup()">Backup</el-button>
+      <el-button size="small"  icon="el-icon-document-copy" v-if="checkPermission(['admin','Operation']) && value != ''" @click="operateHistory()">Result</el-button>
+    </el-card>
+    <el-row>
+        <el-table :data="tableDataList.slice((pagination.world.currentPage-1)*pagination.world.size,pagination.world.currentPage*pagination.world.size)" 
+          :row-key="getRowKeys" 
+          border fit highlight-current-row 
+          style="width: 100%" tooltip-effect="dark" 
+          @selection-change="handleSelectionChange">
+          <el-table-column type="selection" align="center" min-width="55" :reserve-selection="true"></el-table-column>
           <el-table-column label="name" align="center" min-width="100px">
             <template slot-scope="scope"> {{ scope.row.name  }} </template>
           </el-table-column>
-          <!-- <el-table-column label="cluster" align="center" min-width="200px">
-            <template> {{ value }} </template>
-          </el-table-column> -->
-          <el-table-column label="create_time" align="center" min-width="120px" sortable prop="create_time"> 
+          <el-table-column label="create_time" align="center" min-width="140px" sortable prop="create_time"> 
             <template slot-scope="scope"> {{ scope.row.create_time.split(".")[0] }}</template>
           </el-table-column>
-          <el-table-column label="update_time" align="center" min-width="120px">
+          <el-table-column label="update_time" align="center" min-width="140px">
             <template slot-scope="scope"> {{ scope.row.update_time.split(".")[0] }} </template>
           </el-table-column>
           <el-table-column label="image_tag" align="center" min-width="100px">
             <template slot-scope="scope"> {{ scope.row.image_tag }} </template>
+          </el-table-column>
+          <el-table-column label="prod_name" align="center" min-width="100px">
+            <template slot-scope="scope"> {{ scope.row.prod_name }} </template>
           </el-table-column>
           <el-table-column label="healthy_check" align="center" min-width="100px">
             <template slot-scope="scope">
@@ -58,35 +68,48 @@
               </el-tooltip>
             </template>
           </el-table-column>
-          <el-table-column label="操作" align="center" min-width="400px">
+          <el-table-column label="操作" align="center" min-width="250px">
             <template slot-scope="scope">
               <el-button size="small" type="primary" icon="el-icon-chat-line-square" @click="getHistory(scope.row.id)">History</el-button>
-              <el-button size="small" type="warning" icon="el-icon-odometer" v-if="checkPermission(['admin','Operation'])" @click="updateDialog(scope.row)">Upgrade</el-button>
-              <el-button size="small" type="warning" icon="el-icon-refresh-left" v-if="checkPermission(['admin','Operation']) && paneActiveName=='world'" @click="dialogRestartFormVisible=true;restart_world_id=scope.row.id">Restart</el-button>
-              <el-button size="small" type="warning" icon="el-icon-document-copy" v-if="checkPermission(['admin','Operation']) && paneActiveName=='world'" @click="backupConfirm(scope.row)">Backup</el-button>
-              <el-button size="small" type="danger" icon="el-icon-delete" v-if="checkPermission(['admin']) && paneActiveName=='world'" @click="deleteConfirm(scope.row)">Delete</el-button>
+              <!-- <el-button size="small" type="warning" icon="el-icon-odometer" v-if="checkPermission(['admin','Operation'])" @click="updateDialog(scope.row)">Upgrade</el-button> -->
+              <el-button size="small" type="warning" icon="el-icon-refresh-left" v-if="checkPermission(['admin','Operation'])" @click="restrtApp.dialogRestartFormVisible=true;restrtApp.restart_world_id=scope.row.id">Restart</el-button>
+              <!-- <el-button size="small" type="warning" icon="el-icon-document-copy" v-if="checkPermission(['admin','Operation']) && paneActiveName=='world'" @click="backupConfirm(scope.row)">Backup</el-button> -->
+              <el-button size="small" type="danger" icon="el-icon-delete" v-if="checkPermission(['admin'])" @click="deleteConfirm(scope.row)">Delete</el-button>
             </template>
           </el-table-column>
         </el-table>
+        <div class="block" style="margin-left:40%">
+          <el-pagination
+            :hide-on-single-page=true
+            @current-change="paginationCurrentChange"
+            :current-page="pagination.world.currentPage"
+            layout="prev, pager, next"
+            :page-size=pagination.world.size
+            :total=tableDataList.length>
+          </el-pagination>
+        </div>
     </el-row>
 
     <!-- 实时日志dialog、 -->
-    <el-dialog title="RealLog" :visible.sync="dialogRealLogVisible" width="50%" :closeOnClickModal=false :closeOnPressEscape=false :showClose=false>
+    <el-dialog title="RealLog" :visible.sync="realLog.dialogRealLogVisible" width="50%" :closeOnClickModal=false :closeOnPressEscape=false :showClose=false>
       <div class="dialogStyle" id="scroll">
-        <span class="comment" > {{ dialog_data }} </span>
+        <span class="comment" > {{ realLog.dialog_data }} </span>
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="destry()">确 定</el-button>
       </span>
     </el-dialog>
     <!-- 创建dialog、 -->
-    <el-dialog title="Create" :visible.sync="dialogCreateFormVisible" width="40%" :closeOnClickModal=false :closeOnPressEscape=false :showClose=false>
+    <el-dialog title="Create" :visible.sync="createForm.dialogCreateFormVisible" width="40%" :closeOnClickModal=false :closeOnPressEscape=false :showClose=false>
       <el-form :model="createForm">
         <el-form-item label="cluster_name" label-width="110px">
           <el-input v-model="this.value" autocomplete="off" :disabled="true"></el-input>
         </el-form-item>
-        <el-form-item :label="createForm.label_name" label-width="110px">
+        <el-form-item label="world_id" label-width="110px">
           <el-input v-model="createForm.world_id" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="prod_name" label-width="110px">
+          <el-input v-model="createForm.prod_name" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="image_tag" label-width="110px">
           <el-select style="width:220px;" filterable  v-model="createForm.image_tag" placeholder="请选择镜像版本">
@@ -100,15 +123,15 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogCreateFormVisible = false; dialogDestry('创建操作')">取 消</el-button>
+        <el-button @click="createForm.dialogCreateFormVisible = false; dialogDestry('创建操作')">取 消</el-button>
         <el-button type="primary" @click="createWorld()">确认</el-button>
       </div>
     </el-dialog> 
     <!-- 更新dialog、 -->
-    <el-dialog title="Update" :visible.sync="dialogUpdateFormVisible" width="40%" :closeOnClickModal=false :showClose=false>
+    <el-dialog title="Update" :visible.sync="updateForm.dialogUpdateFormVisible" width="40%" :closeOnClickModal=false :showClose=false>
       <el-form :model="updateForm">
         <el-form-item :label="updateForm.label_name" label-width="110px">
-          <el-input v-model="updateForm.world_name" autocomplete="off" :disabled="true"></el-input>
+          <el-input v-model="batchOperate.multipleName" autocomplete="off" :disabled="true"></el-input>
         </el-form-item>
         <el-form-item label="image_tag" label-width="110px">
           <el-select style="width:220px;" filterable  v-model="updateForm.image_tag" placeholder="请选择镜像版本">
@@ -122,13 +145,125 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogUpdateFormVisible = false; dialogDestry('更新操作')">取 消</el-button>
+        <el-button @click="updateForm.dialogUpdateFormVisible = false; dialogDestry('更新操作')">取 消</el-button>
         <el-button type="primary" @click="updateWorld()">确认</el-button>
       </div>
     </el-dialog>
+    <!-- backup dialog -->
+    <el-dialog title="Update" :visible.sync="backupForm.dialogBackupFormVisible" width="40%" :closeOnClickModal=false :showClose=false>
+      <el-form :model="updateForm">
+        <el-form-item :label="updateForm.label_name" label-width="110px">
+          <el-input v-model="batchOperate.multipleName" autocomplete="off" :disabled="true"></el-input>
+        </el-form-item>
+        <p style="margin-left:15px">请确认上述需要备份的服务器列表！ </p>
+        <p style="margin-left:15px">请确认服务器已经对外停止工作！备份操作将<b style="color:red">关闭所有应用</b>并暂停数据库！ </p>
+      </el-form>
+      <div slot="footer" class="dialog-footer" style="margin-top:-30px">
+        <el-button @click="backupForm.dialogBackupFormVisible = false; dialogDestry('备份操作')">取 消</el-button>
+        <el-button type="primary" @click="BackupRedis()">确认</el-button>
+      </div>
+    </el-dialog>
+    <!-- result dialog、 -->
+    <el-dialog title="Batch operation result" :visible.sync="batchResult.dialogResultVisible" width="40%" :closeOnClickModal=false>
+      <el-tabs v-model="batchResult.activeName" @tab-click="batchResultTabClick" style="margin-top:-30px;">
+        <el-tab-pane label="update" name="update">
+          <el-table :data="batchResult.data.slice((pagination.operatehistory.currentPage-1)*pagination.operatehistory.size,pagination.operatehistory.currentPage*pagination.operatehistory.size)" border fit highlight-current-row style="width: 100%">
+            <el-table-column align="center" label="Revision" min-width="65">
+              <template slot-scope="scope">
+                <span>{{ scope.row.revision }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="World" min-width="110">
+              <template slot-scope="scope">
+                <span>{{ scope.row.world }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="180px" align="center" label="Date">
+              <template slot-scope="scope">
+                <span>{{ scope.row.time.split(".")[0] }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="Status" align="center" min-width="110">
+              <template slot-scope="scope">
+                <el-tag :type="scope.row.result | statusFilter">
+                  {{ scope.row.result }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="Reason" min-width="110">
+              <template slot-scope="scope">
+                <el-button type="primary" size="small" @click="showResultReason(scope)">查看详情</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <div class="block" style="margin-left:40%">
+            <el-pagination
+              :hide-on-single-page=true
+              @current-change="paginationCurrentChange"
+              :current-page="pagination.operatehistory.currentPage"
+              layout="prev, pager, next"
+              :page-size=pagination.operatehistory.size
+              :total=batchResult.data.length>
+            </el-pagination>
+          </div>
+        </el-tab-pane>
+
+        <el-tab-pane label="backup" name="backup">
+          <el-table :data="batchResult.data.slice((pagination.operatehistory.currentPage-1)*pagination.operatehistory.size,pagination.operatehistory.currentPage*pagination.operatehistory.size)" border fit highlight-current-row style="width: 100%">
+            <el-table-column align="center" label="Revision" min-width="65">
+              <template slot-scope="scope">
+                <span>{{ scope.row.revision }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="World" min-width="110">
+              <template slot-scope="scope">
+                <span>{{ scope.row.world }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="180px" align="center" label="Date">
+              <template slot-scope="scope">
+                <span>{{ scope.row.time.split(".")[0] }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="Status" align="center" min-width="110">
+              <template slot-scope="scope">
+                <el-tag :type="scope.row.result | statusFilter">
+                  {{ scope.row.result }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="Reason" min-width="110">
+              <template slot-scope="scope">
+                <el-button type="primary" size="small" @click="showResultReason(scope)">查看详情</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <div class="block" style="margin-left:40%">
+            <el-pagination
+              :hide-on-single-page=true
+              @current-change="paginationCurrentChange"
+              :current-page="pagination.operatehistory.currentPage"
+              layout="prev, pager, next"
+              :page-size=pagination.operatehistory.size
+              :total=batchResult.data.length>
+            </el-pagination>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+    </el-dialog>
+    <!-- showResultReason  -->
+    <el-dialog :title="batchResult.reason.title" :visible.sync="batchResult.dialogResultReasonVisible" width="28%" :closeOnClickModal=false :closeOnPressEscape=false>
+      <el-card class="box-card" style="margin-top:-20px;" :body-style="{ padding: '10px' }">
+        <p style="white-space:pre-line;margin:0px;">
+          {{ batchResult.reason.content }}
+        </p>
+      </el-card>
+    </el-dialog>
+
     <!-- history dialog、 -->
-    <el-dialog title="World History" :visible.sync="dialogHistoryFormVisible" width="40%" :closeOnClickModal=false>
-      <el-table :data="HistoryList" style="width: 100%">
+    <el-dialog title="World History" :visible.sync="history.dialogFormVisible" width="40%" :closeOnClickModal=false>
+      <p style="margin-top: -25px;"> 按倒叙排列显示最新十次更新 </p>
+      <el-table :data="history.DataList" style="width: 100%">
         <el-table-column label="revision" align="center" min-width="80px">
           <template slot-scope="scope"> {{ scope.row.revision }} </template>
         </el-table-column>
@@ -141,20 +276,20 @@
       </el-table>
     </el-dialog>
     <!-- restartapp dialog、 -->
-    <el-dialog title="World Restart App" :visible.sync="dialogRestartFormVisible" width="40%" :closeOnClickModal=false>
+    <el-dialog title="World Restart App" :visible.sync="restrtApp.dialogRestartFormVisible" width="40%" :closeOnClickModal=false>
       <div style="margin: -15px 0 20px 0;font-size:15px;">请选择需要重启的应用，请不要在不确定的情况下选择重启redis</div>
-      <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
+      <el-checkbox :indeterminate="restrtApp.isIndeterminate" v-model="restrtApp.checkAll" @change="handleCheckAllChange">全选</el-checkbox>
       <div style="margin: 15px 0;"></div>
-      <el-checkbox-group v-model="checkedApps" @change="handleCheckedCitiesChange">
-        <el-checkbox v-for="app in apps" :label="app" :key="app">{{app}}</el-checkbox>
+      <el-checkbox-group v-model="restrtApp.checkedApps" @change="handleCheckedAppsChange">
+        <el-checkbox v-for="app in restrtApp.apps" :label="app" :key="app">{{app}}</el-checkbox>
       </el-checkbox-group>
       <div slot="footer" class="dialog-footer" style="margin-top: -15px;">
-        <el-button @click="dialogRestartFormVisible = false; dialogDestry('重启操作')">取 消</el-button>
-        <el-button type="primary" :loading=isRestartLoading @click="RestartApp()">确认</el-button>
+        <el-button @click="restrtApp.dialogRestartFormVisible = false; dialogDestry('重启操作')">取 消</el-button>
+        <el-button type="primary" :loading=restrtApp.isRestartLoading @click="RestartApp()">确认</el-button>
       </div>
     </el-dialog>
     <!-- serverlist update dialog -->
-    <el-dialog title="Update ServerList" :visible.sync="dialogServerlistVisible" width="40%" :closeOnClickModal=false>
+    <el-dialog title="Update ServerList" :visible.sync="serverlist.dialogServerlistVisible" width="40%" :closeOnClickModal=false>
       <el-upload
         class="upload-demo"
         ref="upload"
@@ -166,12 +301,12 @@
         <div slot="tip" class="el-upload__tip" style="font-size:16px;margin-top:10px;">只能上传文件，且不超过1mb</div>
       </el-upload>
       <div slot="footer" class="dialog-footer"  style="margin-top: -15px;">
-        <el-button type="primary" @click="dialogEditonlineVisible=true;dialogServerlistVisible=false">在线编辑</el-button>
-        <el-button type="primary" :loading=isServerlistLoading @click="submitUpload">Update</el-button>
+        <el-button type="primary" @click="online_serverlist.dialogEditonlineVisible=true;serverlist.dialogServerlistVisible=false">在线编辑</el-button>
+        <el-button type="primary" :loading=serverlist.isServerlistLoading @click="submitUpload">Update</el-button>
       </div>
     </el-dialog>
     <!-- serverlist update editonline dialog -->
-    <el-dialog title="Update ServerList" :visible.sync="dialogEditonlineVisible" width="40%" :closeOnClickModal=false>
+    <el-dialog title="Update ServerList" :visible.sync="online_serverlist.dialogEditonlineVisible" width="40%" :closeOnClickModal=false>
       <el-form :model="online_serverlist" :rules="rules"> 
         <el-form-item label="version" label-width="80px" prop="version" :validate-event="false">
           <el-input v-model="online_serverlist.version" autocomplete="off"></el-input>
@@ -185,7 +320,7 @@
       </div>
     </el-dialog>
     <!-- notice update dialog -->
-    <el-dialog title="Update Notice" :visible.sync="dialogNoticeVisible" width="40%" :closeOnClickModal=false>
+    <el-dialog title="Update Notice" :visible.sync="notice.dialogNoticeVisible" width="40%" :closeOnClickModal=false>
       <el-form :model="notice" :rules="rules">
         <el-form-item label="old_version" label-width="110px" prop="old_version">
           <el-input v-model="notice.old_version" autocomplete="off"></el-input>
@@ -198,7 +333,7 @@
       <br>
       <p style="margin-top: -10px;margin-left: 15px;color:red">格式: x.x.x  (x表示为数字)</p>
       <div slot="footer" class="dialog-footer"  style="margin-top: -35px;">
-        <el-button type="primary" :loading=isNoticeLoading @click="updateNotice">Update</el-button>
+        <el-button type="primary" :loading=notice.isNoticeLoading @click="updateNotice">Update</el-button>
       </div>
     </el-dialog>
   </div>
@@ -206,10 +341,19 @@
 </template>
 
 <script>
-import { getCluster,getWorld,createWorld,getImages,updateWorld,deleteWorld,GetRealLog,DeleteRealLog,GetWorldStatus,getHistory,RestartApp,BackupRedis,UpdateSecurityGroup,UpdateServerList,updateNotice } from '@/api/cd/world.js'
-import store from '@/store'
+import { getCluster,getWorld,createWorld,getImages,updateWorld,deleteWorld,GetRealLog,DeleteRealLog,GetWorldStatus,getHistory,RestartApp,BackupRedis,UpdateSecurityGroup,UpdateServerList,updateNotice,operateHistory } from '@/api/cd/world.js'
 import checkPermission from '@/utils/permission'
 export default {
+  filters: {
+    statusFilter(status) {
+      const statusMap = {
+        SUCCESS: 'success',
+        EXECUTING: 'info',
+        FAILED: 'danger'
+      }
+      return statusMap[status]
+    }
+  },
   data() {
     let reg = /^\d+\.\d+\.\d+$/
     var checkVersion = (rule, value, callback) => {
@@ -220,7 +364,39 @@ export default {
           callback()
       }
     }
+
     return {
+      ClusterList: [],   //cluster选择
+      value: "",         //cluster选择的值
+      tableDataList: [], //world列表
+      ImageList: [],     //镜像列表
+
+      pagination: {
+        world: {
+          currentPage: 1,
+          size: 10,
+        },
+        operatehistory: {
+          currentPage: 1,
+          size: 5,
+        },
+      },
+      serverlist: {
+        fileList: [],
+        dialogServerlistVisible: false,
+        isServerlistLoading: false,
+      },
+      online_serverlist: {
+        version: "",
+        dialogEditonlineVisible: false,
+      },
+      notice: {
+        old_version: "",
+        new_version: "",
+        isNoticeLoading: false,
+        dialogNoticeVisible: false,
+      },
+      //notice新旧版本验证规则
       rules:{
         old_version: [
           { validator: checkVersion, trigger: 'blur' }
@@ -232,54 +408,55 @@ export default {
           { validator: checkVersion, trigger: 'blur' }
         ], 
       },
-      fileList: [],
-      online_serverlist: {
-        version: "",
-      },
-      checkedApps: ['map', 'stateless', 'center', 'gate', 'logic'],
-      apps: ['map', 'stateless', 'center', 'gate', 'logic', 'redis'],
-      isIndeterminate: true,
-      checkAll: false,
-      restart_world_id: "",
-      paneActiveName: "world",
-      create_Value: "New world",
-      ClusterList: "",
-      HistoryList: "",
-      tableDataList: [],
-      value: "",
       createForm: {
         world_id: "",
         cluster_name: "",
         image_tag: "",
         label_name: "world_id",
+        prod_name: "",
+        dialogCreateFormVisible: false,
       },
       updateForm: {
-        world_name: "",
         image_tag: "",
-        world_id: "",
         label_name: "world_name",
+        dialogUpdateFormVisible: false,
       },
-      notice: {
-        old_version: "",
-        new_version: "",
+      backupForm: {
+        dialogBackupFormVisible: false,
       },
-      ImageList: "",
-      formLabelWidth: '80px',
-      path: "",
-      timer: "",
-      dialog_data: "Loading...",
-      dialogRealLogVisible: false,
-      dialogCreateFormVisible: false,
-      dialogUpdateFormVisible: false,
-      dialogHistoryFormVisible: false,
-      dialogRestartFormVisible: false,
-      isRestartLoading: false,
-      dialogServerlistVisible: false,
-      dialogNoticeVisible: false,
-      isServerlistLoading: false,
-      dialogEditonlineVisible: false,
-      isNoticeLoading: false,
-      isSecurityGroupLoading: false,
+      batchOperate: {
+        multipleId: [],
+        multipleName: "",
+      },
+      batchResult: {
+        dialogResultVisible: false,
+        dialogResultReasonVisible: false,
+        data: [],
+        activeName: "update",
+        reason: {
+          content: "",
+          title: "",
+        },
+      },
+      restrtApp: {
+        restart_world_id: "",
+        checkedApps: ['map', 'stateless', 'center', 'gate', 'logic'],
+        apps: ['map', 'stateless', 'center', 'gate', 'logic', 'redis'],
+        dialogRestartFormVisible: false,
+        isRestartLoading: false,
+        isIndeterminate: true,
+        checkAll: false,
+      },
+      history: { 
+        DataList: [],   
+        dialogFormVisible: false,
+      },
+      realLog: {
+        path: "",
+        timer: "",
+        dialog_data: "Loading...",
+        dialogRealLogVisible: false,
+      },
     }
   },
   mounted: function () {
@@ -306,16 +483,16 @@ export default {
     },
 
     //switch world type world/global
-    handleClick(tab, event) {
-      this.getWorld()
-      this.create_Value = "New "+this.paneActiveName
-      this.createForm.label_name = this.paneActiveName+"_id"
-      this.updateForm.label_name = this.paneActiveName+"_name"
-    },
+    // handleClick(tab, event) {
+    //   this.getWorld()
+    //   this.create_Value = "New "+this.paneActiveName
+    //   this.createForm.label_name = this.paneActiveName+"_id"
+    //   this.updateForm.label_name = this.paneActiveName+"_name"
+    // },
 
     //get world  and set init value 
     getWorld(){
-      getWorld(this.value,this.paneActiveName)
+      getWorld(this.value)
         .then(response => {
             this.tableDataList = response.map(v =>{
               this.$set(v,"healthy", "NoData")
@@ -344,19 +521,19 @@ export default {
      
     //create world
     createWorld() {
-      this.dialogCreateFormVisible=false,
-      this.dialogRealLogVisible = true,
-      this.path = '/tmp/create_world.log',
-      createWorld({ cluster: this.value, world_id: this.createForm.world_id, image_tag: this.createForm.image_tag, type: this.paneActiveName })
+      this.createForm.dialogCreateFormVisible=false,
+      this.realLog.dialogRealLogVisible = true,
+      this.realLog.path = '/tmp/create_world.log',
+      createWorld({ cluster: this.value, world_id: this.createForm.world_id, image_tag: this.createForm.image_tag, prod_name: this.createForm.prod_name })
         .then(response => {
-          clearInterval(this.timer)
+          clearInterval(this.realLog.timer)
           this.getData()
         }, response => {
-          clearInterval(this.timer)
+          clearInterval(this.realLog.timer)
           this.getData()
           console.log(response);
         });
-      this.timer = setInterval(() => {
+      this.realLog.timer = setInterval(() => {
           setTimeout(this.getData)
       }, 3000)
       this.createForm.world_id=""
@@ -372,35 +549,54 @@ export default {
         }) 
     },
     //update world 
-    updateDialog(row){
-      this.dialogUpdateFormVisible=true,
-      this.updateForm.world_name=row.name,
-      this.updateForm.world_id=row.id
+    beforeUpdate(){
+      if(this.batchOperate.multipleName==""){
+        this.$message({
+          message: '请先选择需要更新的world',
+          type: 'warning'
+        });
+      }else{
+        this.updateForm.dialogUpdateFormVisible = true;
+      }
     },
     updateWorld() {
-      this.dialogUpdateFormVisible=false,
-      this.dialogRealLogVisible = true,
-      this.path = '/tmp/update_world.log',
-      updateWorld( this.updateForm.world_id,{ image_tag: this.updateForm.image_tag, type: this.paneActiveName })
+      this.updateForm.dialogUpdateFormVisible=false,
+      this.$notify({
+        title: '更新开始', 
+        // type: 'success',
+        message: this.$createElement('i', { style: 'color: teal'}, '更新已经开始,请前往Result界面查看结果')
+      });
+      this.batchResult.activeName = "update"
+      updateWorld( { world_list: this.batchOperate.multipleId, image_tag: this.updateForm.image_tag })
         .then(response => {
-          clearInterval(this.timer)
-          this.getData()
-        }, response => {
-          clearInterval(this.timer)
-          this.getData()
           console.log(response);
         });
-      this.timer = setInterval(() => {
-          setTimeout(this.getData)
-      }, 3000)
+    },
+    //operateHistory
+    operateHistory(){
+      this.batchResult.dialogResultVisible = true,
+      operateHistory(this.batchResult.activeName,this.value)
+        .then(response => {
+          this.batchResult.data = response
+        }, response => {
+          console.log(response);
+        });
+    },
+    batchResultTabClick(){
+      this.operateHistory()
+    },
+    showResultReason(scope){
+      this.batchResult.dialogResultReasonVisible = true
+      this.batchResult.reason.content = scope.row.reason
+      this.batchResult.reason.title = scope.row.world
     },
 
     //get world update history
     getHistory(pk){
-      this.dialogHistoryFormVisible = true
+      this.history.dialogFormVisible = true
       getHistory(pk)
         .then(response => {
-            this.HistoryList = response
+            this.history.DataList = response
         }, response => {
             console.log(response);
         }) 
@@ -429,79 +625,86 @@ export default {
       });
     },
     deleteWorld(pk){
-      this.dialogRealLogVisible = true,
-      this.path = '/tmp/delete_world.log',
+      this.realLog.dialogRealLogVisible = true,
+      this.realLog.path = '/tmp/delete_world.log',
       deleteWorld(pk)
         .then(response => {
-          clearInterval(this.timer)
+          clearInterval(this.realLog.timer)
           this.getData()  
         }, response => {
-          clearInterval(this.timer)
+          clearInterval(this.realLog.timer)
           this.getData()
           console.log(response);
         }) 
-      this.timer = setInterval(() => {
+      this.realLog.timer = setInterval(() => {
           setTimeout(this.getData)
       }, 3000)
     },
 
 
     //backup redis data and mkdir bak dir
-    backupConfirm(row) {
-      this.$prompt('请确认服务器已经对外停止工作！备份操作将关闭所有应用并暂停数据库！ 请输入需要更新的服务器名称确认备份。 ', '警告', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        closeOnClickModal: false,
-        inputValidator: (value) => {
-          if (row.name == value){
-            return true
-          }else{
-            return "world_name不匹配"
-          }
-        },
-      }).then(() => {
-        this.BackupRedis(row.id);
-      }).catch(() => {
+    // backupConfirm(row) {
+    //   this.$prompt('请确认服务器已经对外停止工作！备份操作将关闭所有应用并暂停数据库！ 请输入需要更新的服务器名称确认备份。 ', '警告', {
+    //     confirmButtonText: '确定',
+    //     cancelButtonText: '取消',
+    //     closeOnClickModal: false,
+    //     inputValidator: (value) => {
+    //       if (row.name == value){
+    //         return true
+    //       }else{
+    //         return "world_name不匹配"
+    //       }
+    //     },
+    //   }).then(() => {
+    //     this.BackupRedis(row.id);
+    //   }).catch(() => {
+    //     this.$message({
+    //       type: 'info',
+    //       message: '已取消备份操作',
+    //     });
+    //   });
+    // },
+    beforeBackup(){
+      if(this.batchOperate.multipleName==""){
         this.$message({
-          type: 'info',
-          message: '已取消备份操作',
+          message: '请先选择需要备份的world',
+          type: 'warning'
         });
-      });
+      }else{
+        this.backupForm.dialogBackupFormVisible = true;
+      }
     },
-    BackupRedis(pk){
-      this.dialogRealLogVisible = true,
-      this.path = '/tmp/world_bakcup.log',
-      BackupRedis(pk)
-        .then(response => {
-          clearInterval(this.timer)
-          this.getData()  
-        }, response => {
-          clearInterval(this.timer)
-          this.getData()
-          console.log(response);
-        }) 
-      this.timer = setInterval(() => {
-          setTimeout(this.getData)
-      }, 3000)
+    BackupRedis(){
+      this.backupForm.dialogBackupFormVisible=false
+      this.$notify({
+        title: '备份开始', 
+        // type: 'success',
+        message: this.$createElement('i', { style: 'color: teal'}, '备份已经开始,请前往Result界面查看结果')
+      });
+      this.batchResult.activeName = "backup"
+      BackupRedis({ world_list: this.batchOperate.multipleId })
+      .then(response => {
+        console.log(response);
+      }) 
     },
 
     //check restart app select checkbox 
     handleCheckAllChange(val) {
-      this.checkedApps = val ? this.apps : [];
-      this.isIndeterminate = false;
+      this.restrtApp.checkedApps = val ? this.restrtApp.apps : [];
+      this.restrtApp.isIndeterminate = false;
     },
-    handleCheckedCitiesChange(value) {
+    handleCheckedAppsChange(value) {
       let checkedCount = value.length;
-      this.checkAll = checkedCount === this.apps.length;
-      this.isIndeterminate = checkedCount > 0 && checkedCount < this.apps.length;
+      this.restrtApp.checkAll = checkedCount === this.restrtApp.apps.length;
+      this.restrtApp.isIndeterminate = checkedCount > 0 && checkedCount < this.restrtApp.apps.length;
     },
     //restart world app
     RestartApp(){
-      this.isRestartLoading = true,
-      RestartApp(this.restart_world_id,{"apps": this.checkedApps})
+      this.restrtApp.isRestartLoading = true,
+      RestartApp(this.restrtApp.restart_world_id,{"apps": this.restrtApp.checkedApps})
       .then(response => {
-          this.isRestartLoading = false,
-          this.dialogRestartFormVisible = false,
+          this.restrtApp.isRestartLoading = false,
+          this.restrtApp.dialogRestartFormVisible = false,
           this.$message({
             type: 'success',
             message: '重启成功'
@@ -514,7 +717,7 @@ export default {
 
     /// update serverlist
     updatefilechange(file, fileList){
-      this.fileList = fileList  
+      this.serverlist.fileList = fileList  
     },
     beforePicUpload (file) {
       const isLt1M = file.size / 1024 / 1024 < 1
@@ -539,32 +742,32 @@ export default {
               type: 'success'
             })
           }
-          this.isServerlistLoading=false
-          this.dialogServerlistVisible=false
+          this.serverlist.isServerlistLoading=false
+          this.serverlist.dialogServerlistVisible=false
           console.log(response);
       }, response => {
-        this.isServerlistLoading=false
-        this.dialogServerlistVisible=false
+        this.serverlist.isServerlistLoading=false
+        this.serverlist.dialogServerlistVisible=false
         console.log(response);
       });
       return false
     },
     submitUpload() {
-      if (this.fileList == 0){  //验证filelist是否长度为0，为0就会报错
+      if (this.serverlist.fileList == 0){  //验证filelist是否长度为0，为0就会报错
         this.$message({
           type: 'error',
           message: '请选择文件'
         });
         return false
       }
-      this.isServerlistLoading = true
+      this.serverlist.isServerlistLoading = true
       this.$refs.upload.submit();
     },
 
 
     //update notice
     updateNotice(){
-      this.isNoticeLoading = true;
+      this.notice.isNoticeLoading = true;
       updateNotice({"cluster": this.value,"old_version": this.notice.old_version,"new_version": this.notice.new_version})
       .then(response => {
         if (response.status == 500){
@@ -578,12 +781,12 @@ export default {
             message: '更新成功'
           });
         }
-        this.isNoticeLoading = false;
-        this.dialogNoticeVisible = false;
+        this.notice.isNoticeLoading = false;
+        this.notice.dialogNoticeVisible = false;
         console.log(response);
       }, response => {
-        this.isNoticeLoading = false;
-        this.dialogNoticeVisible = false;
+        this.notice.isNoticeLoading = false;
+        this.notice.dialogNoticeVisible = false;
         console.log(response);
       })
     },
@@ -641,9 +844,9 @@ export default {
 
     //get reallog data from logfile
     getData(){
-      GetRealLog(this.path)
+      GetRealLog(this.realLog.path)
         .then(response => {
-            this.dialog_data = response
+            this.realLog.dialog_data = response
             this.$nextTick(() => {   //滚动条最下函数
               let msg = document.getElementById('scroll') // 获取对象
               msg.scrollTop = msg.scrollHeight // 滚动高度
@@ -654,10 +857,10 @@ export default {
     },
     //destry RealLog dialog
     destry() { 
-      this.dialogRealLogVisible = false,
-      DeleteRealLog({ path: this.path })
-      this.dialog_data="loading..."
-      clearInterval(this.timer)
+      this.realLog.dialogRealLogVisible = false,
+      DeleteRealLog({ path: this.realLog.path })
+      this.realLog.dialog_data="loading..."
+      clearInterval(this.realLog.timer)
       this.getWorld()
     },
     dialogDestry(str){
@@ -677,7 +880,27 @@ export default {
       console.log(val1,val2)
       return val1 - val2
     },
+      
+    //world select value change
+    handleSelectionChange(val) {
+      this.batchOperate.multipleId = val.map(function (item, idnex) {
+          return item.id
+      })
+      this.batchOperate.multipleName = val.map(function (item, idnex) {
+          return item.name
+      })
+      this.batchOperate.multipleName = this.batchOperate.multipleName.toString()
+    },
 
+    //pagination
+    paginationCurrentChange(val) {
+      // console.log(`当前页: ${val}`);
+      this.pagination.world.currentPage = val
+    },
+    //分页时要设置选择会有一个行号，这里需要一个RowKey的属性
+    getRowKeys(row) {
+      return row.id; 
+    },
   }
 }
 </script>
