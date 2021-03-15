@@ -1,6 +1,6 @@
 <template>
   <div class="app-container" >
-    <el-select style="width:220px;" v-model="value" placeholder="请选择cluster环境" @change="getWorld();getImages()">
+    <el-select style="width:220px;" v-model="value" placeholder="请选择cluster环境" @change="changeCluster">
         <el-option
           v-for="item in ClusterList"
           :key="item"
@@ -9,19 +9,19 @@
         </el-option>
     </el-select>
     <el-row style="float:right;margin-top: 15px;margin-right:25px;"  v-if="value!=''">
-        <el-button size="medium" type="primary" icon="el-icon-copy-document" v-if="checkPermission(['admin','Operation'])" @click="createForm.dialogCreateFormVisible=true" style="height:40px;" >New world</el-button>
+        <el-button size="medium" type="primary" icon="el-icon-copy-document" v-if="checkPermission(['admin','Operation'])" @click="createForm.dialogCreateFormVisible=true" style="height:40px;" >New {{ typeActiveName }}</el-button>
     </el-row>
     <el-row style="float:right;margin-top: 15px;margin-right:35px;"  v-if="value=='firestrike-oregon-prod-2'">
-        <el-button size="medium" type="primary" icon="el-icon-upload" @click="serverlist.dialogServerlistVisible=true" v-if="checkPermission(['admin','Operation'])" style="height:40px;">serverlist</el-button>
+        <el-button size="medium" type="primary" icon="el-icon-upload" @click="serverlist.dialogServerlistVisible=true" v-if="checkPermission(['admin','Operation']) && typeActiveName=='world'" style="height:40px;">serverlist</el-button>
     </el-row>
     <el-row style="float:right;margin-top: 15px;margin-right:35px;"  v-if="value=='firestrike-oregon-prod-2'">
-        <el-button size="medium" type="primary" icon="el-icon-upload" @click="notice.dialogNoticeVisible=true" v-if="checkPermission(['admin','Operation'])" style="height:40px;">notice</el-button>
+        <el-button size="medium" type="primary" icon="el-icon-upload" @click="notice.dialogNoticeVisible=true" v-if="checkPermission(['admin','Operation']) && typeActiveName=='world'" style="height:40px;">notice</el-button>
     </el-row>
-    <!-- <el-tabs style="margin-top: 10px" type="card" v-model="paneActiveName" @tab-click="handleClick">
+    <el-tabs style="margin-top: 10px" type="card" v-model="typeActiveName" @tab-click="typehandleClick" v-if="value!=''">
       <el-tab-pane label="world" name="world"></el-tab-pane>
-      <el-tab-pane label="global" name="global"></el-tab-pane>
-    </el-tabs> -->
-    <el-card class="box-card" shadow="hover" style="margin-top:20px" :body-style="{ padding: '10px' }">
+      <el-tab-pane label="copymap" name="copymap"></el-tab-pane>
+    </el-tabs>
+    <el-card class="box-card" shadow="hover" :style="value!='' ? 'margin-top:-16px' : 'margin-top:10px'" :body-style="{ padding: '10px' }">
       <el-button size="small"  icon="el-icon-odometer" v-if="checkPermission(['admin','Operation']) && value != ''" @click="beforeUpdate()">Upgrade</el-button>
       <el-button size="small"  icon="el-icon-document-copy" v-if="checkPermission(['admin','Operation']) && value != ''" @click="beforeBackup()">Backup</el-button>
       <el-button size="small"  icon="el-icon-document-copy" v-if="checkPermission(['admin','Operation']) && value != ''" @click="operateHistory()">Result</el-button>
@@ -31,6 +31,7 @@
           :row-key="getRowKeys" 
           border fit highlight-current-row 
           style="width: 100%" tooltip-effect="dark" 
+          ref="multipleTable"
           @selection-change="handleSelectionChange">
           <el-table-column type="selection" align="center" min-width="55" :reserve-selection="true"></el-table-column>
           <el-table-column label="name" align="center" min-width="100px">
@@ -71,9 +72,7 @@
           <el-table-column label="操作" align="center" min-width="250px">
             <template slot-scope="scope">
               <el-button size="small" type="primary" icon="el-icon-chat-line-square" @click="getHistory(scope.row.id)">History</el-button>
-              <!-- <el-button size="small" type="warning" icon="el-icon-odometer" v-if="checkPermission(['admin','Operation'])" @click="updateDialog(scope.row)">Upgrade</el-button> -->
               <el-button size="small" type="warning" icon="el-icon-refresh-left" v-if="checkPermission(['admin','Operation'])" @click="restrtApp.dialogRestartFormVisible=true;restrtApp.restart_world_id=scope.row.id">Restart</el-button>
-              <!-- <el-button size="small" type="warning" icon="el-icon-document-copy" v-if="checkPermission(['admin','Operation']) && paneActiveName=='world'" @click="backupConfirm(scope.row)">Backup</el-button> -->
               <el-button size="small" type="danger" icon="el-icon-delete" v-if="checkPermission(['admin'])" @click="deleteConfirm(scope.row)">Delete</el-button>
             </template>
           </el-table-column>
@@ -105,10 +104,10 @@
         <el-form-item label="cluster_name" label-width="110px">
           <el-input v-model="this.value" autocomplete="off" :disabled="true"></el-input>
         </el-form-item>
-        <el-form-item label="world_id" label-width="110px">
+        <el-form-item :label="typeActiveName+'_id'" label-width="110px">
           <el-input v-model="createForm.world_id" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="prod_name" label-width="110px">
+        <el-form-item label="prod_name" label-width="110px" v-if="value=='firestrike-oregon-prod-2' && typeActiveName=='world'">
           <el-input v-model="createForm.prod_name" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="image_tag" label-width="110px">
@@ -178,7 +177,7 @@
                 <span>{{ scope.row.world }}</span>
               </template>
             </el-table-column>
-            <el-table-column min-width="180px" align="center" label="Date">
+            <el-table-column min-width="140px" align="center" label="Date">
               <template slot-scope="scope">
                 <span>{{ scope.row.time.split(".")[0] }}</span>
               </template>
@@ -220,7 +219,7 @@
                 <span>{{ scope.row.world }}</span>
               </template>
             </el-table-column>
-            <el-table-column min-width="180px" align="center" label="Date">
+            <el-table-column min-width="140px" align="center" label="Date">
               <template slot-scope="scope">
                 <span>{{ scope.row.time.split(".")[0] }}</span>
               </template>
@@ -371,6 +370,8 @@ export default {
       tableDataList: [], //world列表
       ImageList: [],     //镜像列表
 
+      typeActiveName: "world", //不同的创建面板
+      
       pagination: {
         world: {
           currentPage: 1,
@@ -413,7 +414,7 @@ export default {
         cluster_name: "",
         image_tag: "",
         label_name: "world_id",
-        prod_name: "",
+        prod_name: "Planet #",
         dialogCreateFormVisible: false,
       },
       updateForm: {
@@ -482,17 +483,25 @@ export default {
         }) 
     },
 
-    //switch world type world/global
-    // handleClick(tab, event) {
-    //   this.getWorld()
-    //   this.create_Value = "New "+this.paneActiveName
-    //   this.createForm.label_name = this.paneActiveName+"_id"
-    //   this.updateForm.label_name = this.paneActiveName+"_name"
-    // },
+    changeCluster(){
+      this.getWorld()
+      this.getImages()
+      this.batchOperate.multipleId = []
+      this.batchOperate.multipleName = ""
+      this.$refs.multipleTable.clearSelection();
+    },
+
+    // switch world type world/global
+    typehandleClick(tab, event) {
+      this.getWorld()
+      // this.create_Value = this.typeActiveName
+      // this.createForm.label_name = this.typeActiveName+"_id"
+      // this.updateForm.label_name = this.typeActiveName+"_name"
+    },
 
     //get world  and set init value 
     getWorld(){
-      getWorld(this.value)
+      getWorld(this.value,this.typeActiveName)
         .then(response => {
             this.tableDataList = response.map(v =>{
               this.$set(v,"healthy", "NoData")
@@ -521,18 +530,37 @@ export default {
      
     //create world
     createWorld() {
-      this.createForm.dialogCreateFormVisible=false,
-      this.realLog.dialogRealLogVisible = true,
-      this.realLog.path = '/tmp/create_world.log',
+      this.createForm.dialogCreateFormVisible=false
+      this.realLog.dialogRealLogVisible = true
+      this.realLog.path = '/tmp/create_world.log'
+      if ( this.value=="firestrike-singapore-dev" ){
+        this.createForm.prod_name=""
+      }
       createWorld({ cluster: this.value, world_id: this.createForm.world_id, image_tag: this.createForm.image_tag, prod_name: this.createForm.prod_name })
+        // .then(response => {
+        //   clearInterval(this.realLog.timer)
+        //   this.getData()
+        // }, response => {
+        //   clearInterval(this.realLog.timer)
+        //   this.getData()
+        //   console.log(response);
+        // });
         .then(response => {
+          if (response.code == 500){
+            this.realLog.dialogRealLogVisible = false,
+            this.$message({
+              type: 'warning',
+              duration: 8000,
+              message: response.msg
+            });
+          }
           clearInterval(this.realLog.timer)
           this.getData()
         }, response => {
           clearInterval(this.realLog.timer)
           this.getData()
           console.log(response);
-        });
+        })
       this.realLog.timer = setInterval(() => {
           setTimeout(this.getData)
       }, 3000)
@@ -561,16 +589,25 @@ export default {
     },
     updateWorld() {
       this.updateForm.dialogUpdateFormVisible=false,
-      this.$notify({
-        title: '更新开始', 
-        // type: 'success',
-        message: this.$createElement('i', { style: 'color: teal'}, '更新已经开始,请前往Result界面查看结果')
-      });
       this.batchResult.activeName = "update"
-      updateWorld( { world_list: this.batchOperate.multipleId, image_tag: this.updateForm.image_tag })
+      updateWorld( { world_list: this.batchOperate.multipleId, image_tag: this.updateForm.image_tag }) 
         .then(response => {
+          if (response.code == 500){
+            this.$message({
+              type: 'warning',
+              duration: 8000,
+              message: response.msg
+            });
+          }else{
+            this.$notify({
+              title: '更新开始', 
+              // type: 'success',
+              message: this.$createElement('i', { style: 'color: teal'}, '更新已经开始,请前往Result界面查看结果')
+            });
+          }
+      }, response => {
           console.log(response);
-        });
+      }) 
     },
     //operateHistory
     operateHistory(){

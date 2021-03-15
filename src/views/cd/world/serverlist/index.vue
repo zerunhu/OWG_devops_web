@@ -7,18 +7,24 @@
       <a :href='file_url' target="_blank">here</a>
       to download the serverlist file in aws
     </aside>
+    <el-row style="float:right;margin:5px 25px 10px 0;z-index:1000">
+      <el-button size="medium" type="primary" icon="el-icon-copy-document" style="height:40px;" @click="dialogCreateFormVisible=true">New Line</el-button>
+    </el-row>
     <el-row>
         <el-table v-loading="tableloading" :data="serverlist" border fit highlight-current-row style="width: 100%" >
-          <el-table-column label="id" align="center" min-width="120px">
+          <el-table-column label="id" align="center" min-width="80px">
             <template slot-scope="scope"> {{ scope.row.id  }} </template>
           </el-table-column>
           <el-table-column label="name" align="center" min-width="150px">
             <template slot-scope="scope"> {{ scope.row.name }} </template>
           </el-table-column>
-          <el-table-column label="ip" align="center" min-width="250px">
+          <el-table-column label="ip" align="center" min-width="180px">
             <template slot-scope="scope"> {{ scope.row.ip }} </template>
           </el-table-column>
-          <el-table-column label="port" align="center" min-width="150px">
+          <el-table-column label="sort" align="center" min-width="120px">
+            <template slot-scope="scope"> {{ scope.row.sort }} </template>
+          </el-table-column>
+          <el-table-column label="port" align="center" min-width="120px">
             <template slot-scope="scope"> {{ scope.row.port }} </template>
           </el-table-column>
           <el-table-column label="realstate" align="center" min-width="100px">
@@ -81,10 +87,61 @@
         <el-button type="primary" :loading=isUpdateLoading @click="updateServerlistonline()">更新</el-button>
       </div>
     </el-dialog>
+    <!-- add dialog、 -->
+    <el-dialog title="New ServerList" :visible.sync="dialogCreateFormVisible" width="40%" :closeOnClickModal=false :showClose=false>
+      <el-form :model="createForm">
+        <el-form-item label="Id" label-width="110px">
+          <el-input v-model="createForm.id" autocomplete="off" @input="createIdchange"></el-input>
+        </el-form-item>
+        <el-form-item label="Name" label-width="110px">
+          <el-input v-model="createForm.name" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="Port" label-width="110px">
+          <el-input v-model="createForm.port" autocomplete="off" :disabled="true"></el-input>
+        </el-form-item>
+        <el-form-item label="Ip" label-width="110px">
+          <el-input v-model="createForm.ip" autocomplete="off" :disabled="true"></el-input>
+        </el-form-item>
+        <el-form-item label="Sort" label-width="110px">
+          <el-input v-model="createForm.sort" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="Realstate" label-width="110px">
+          <el-input v-model="createForm.realstate" autocomplete="off" :disabled="true"></el-input>
+        </el-form-item>
+        <el-form-item label="State" label-width="110px">
+          <el-select v-model="createForm.state" placeholder="请选择">
+            <el-option
+              v-for="item in serverStates"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+              <span style="float: left">{{ item.label }}</span>
+              <span style="float: right; color: #8492a6; font-size: 13px">{{ item.value }}</span>
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Property" label-width="110px">
+          <el-select v-model="createForm.property" placeholder="请选择">
+            <el-option
+              v-for="item in serverProperty"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+              <span style="float: left">{{ item.label }}</span>
+              <span style="float: right; color: #8492a6; font-size: 13px">{{ item.value }}</span>
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogCreateFormVisible = false; dialogDestry('编辑')">取 消</el-button>
+        <el-button type="primary" :loading=isCreateLoading @click="addServerlistonline">新 增</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
-import { getServerlistonline,updateServerlistonline } from '@/api/cd/world'
+import { getServerlistonline,updateServerlistonline,addServerlistonline } from '@/api/cd/world'
 export default {
   data() {
     return {
@@ -98,6 +155,20 @@ export default {
       serverStates: [{label: "空闲",value:1},{label: "维护",value:5},{label: "维护(内网可进入)",value:7},{label: "火爆",value:8}],
       serverProperty: [{label: "新服",value:1},{label: "推荐",value:2},{label: "一般",value:3}],
       isUpdateLoading: false,
+
+      //createForm
+      dialogCreateFormVisible: false,
+      isCreateLoading: false,
+      createForm: {
+        id: "",
+        sort: "",
+        state: "",
+        name: "Planet #",
+        ip: "34.216.44.228",
+        port: "",
+        property: "",
+        realstate: 1,
+      },
     }
   },
   mounted: function () {
@@ -143,11 +214,30 @@ export default {
           console.log(response);
       });
     },
+    addServerlistonline(){
+      this.isCreateLoading = true
+      addServerlistonline({"host_path":this.host_path,"create_form": this.createForm,"cluster_name":this.$route.query.cluster_name})
+        .then(response => {
+          this.dialogCreateFormVisible = false
+          this.isCreateLoading = false
+          this.$message({
+            type: 'success',
+            message: '新增成功'
+          });
+          console.log(response);
+      }, response => {
+          console.log(response);
+      });
+      this.getServerlistonline()
+    },
     dialogDestry(str){
       this.$message({
         type: 'info',
         message: '已取消'+str
       });
+    },
+    createIdchange(){
+      this.createForm.port = parseInt(this.createForm.id) + 30000
     },
   }
 }

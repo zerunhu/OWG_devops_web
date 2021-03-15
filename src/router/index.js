@@ -294,6 +294,18 @@ export const asyncRouterMap = [
     },
     ]
   },
+  {
+    path: '/plan',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Plan',
+        component: () => import('@/views/operationplan/index'),
+        meta: { title: 'Plan', icon: 'form' }
+      }
+    ]
+  },
   { path: '*', redirect: '/404', hidden: true }
 ];
 

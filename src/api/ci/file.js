@@ -30,7 +30,7 @@ export function fileDownload(pk) {
       responseType: 'blob',
   })
 }
-export function UpdateServerList(data,pk) {
+export function fileUpload(data,pk) {
   return request({
     url: '/api/configfile/'+pk+'/upload/',
     method: 'post',
