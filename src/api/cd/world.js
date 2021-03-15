@@ -1,6 +1,4 @@
 import request from '@/utils/request'
-import axios from 'axios'
-import { getToken } from '@/utils/auth'
 
 export function getCluster() {
   return request({
@@ -124,6 +122,13 @@ export function getServerlistonline(cluster_name,version) {
 export function updateServerlistonline(data) {
   return request({
     url: '/api/world/updateserverlistonline/',
+    method: 'post',
+    data
+  })
+} 
+export function addServerlistonline(data) {
+  return request({
+    url: '/api/world/addserverlistonline/',
     method: 'post',
     data
   })
