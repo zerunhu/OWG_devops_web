@@ -32,8 +32,8 @@
           </el-table-column>
           <el-table-column label="操作" align="center"  min-width="300px">
             <template slot-scope="scope">
-                <el-button size="small" type="primary" icon="el-icon-connection" v-if="checkPermission(['admin','Operation'])" :loading=scope.row.pushloading @click="sacleFrom(scope.row)">scale</el-button>
-                <el-button size="small" type="danger" icon="el-icon-delete" v-if="checkPermission(['admin','Operation'])" >delete</el-button>
+                <el-button size="small" type="primary" icon="el-icon-connection" v-if="checkPermission(['admin'])" :loading=scope.row.pushloading @click="sacleFrom(scope.row)">scale</el-button>
+                <el-button size="small" type="danger" icon="el-icon-delete" v-if="checkPermission(['admin'])" >delete</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -98,7 +98,8 @@ export default {
       if ( this.value.indexOf("dev") == -1 ){
         return checkPermission(roles)
       }else{
-        return true
+        roles.push("Development")
+        return checkPermission(roles)
       }
     },
     getCluster(){

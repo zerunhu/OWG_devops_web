@@ -19,16 +19,16 @@
     <el-row style="margin-top: -16px">
         <el-table :data="TagList.slice((currentPage-1)*page_size,currentPage*page_size)" border fit highlight-current-row  style="width: 100%" >
           <el-table-column label="镜像名称" align="center" min-width="200">
-            <template > {{ value }} </template>
+            <template slot-scope="scope"> {{ scope.row.name }} </template>
           </el-table-column>
-          <el-table-column label="tag" align="center" min-width="160">
-            <template slot-scope="scope"> {{ scope.row.tag }} </template>
+          <el-table-column label="svn_num" align="center" min-width="160">
+            <template slot-scope="scope"> {{ scope.row.svn_num }} </template>
           </el-table-column>
           <el-table-column label="创建时间" align="center" min-width="240">
             <template slot-scope="scope"> {{ scope.row.create_time }}</template>
           </el-table-column>
-          <el-table-column label="ecr_address" align="center" min-width="400">
-            <template slot-scope="scope"> {{ scope.row.ecr_address }} </template>
+          <el-table-column label="svn_num" align="center" min-width="300">
+            <template slot-scope="scope"> {{ scope.row.svn_branch }} </template>
           </el-table-column>
           <el-table-column label="操作" align="center" min-width="200">
             <template>

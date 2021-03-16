@@ -6,7 +6,7 @@ function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
-const name = defaultSettings.title || 'vue Admin Template' // page title
+const name = defaultSettings.title || 'OWG DevOps Platform' // page title
 
 // If your port is set to 80,
 // use administrator privileges to execute the command line.
@@ -47,8 +47,8 @@ module.exports = {
       // }
       // ,
       "/api":{
-        // target: 'http://127.0.0.1:8002',
-        target: 'http://172.20.1.168:8001',
+        target: 'http://127.0.0.1:8002',
+        // target: 'http://172.20.1.168:8001',
         changeOrigin: true,
         // pathRewrite: {
         //   ['^' + process.env.VUE_APP_BASE_API]: ''

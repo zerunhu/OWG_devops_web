@@ -1,6 +1,6 @@
 module.exports = {
 
-  title: 'Vue Admin Template',
+  title: 'OWG DevOps Platform',
 
   /**
    * @type {boolean} true | false

@@ -9,22 +9,22 @@
         </el-option>
     </el-select>
     <el-row style="float:right;margin-top: 15px;margin-right:25px;"  v-if="value!=''">
-        <el-button size="medium" type="primary" icon="el-icon-copy-document" v-if="checkPermission(['admin','Operation'])" @click="createForm.dialogCreateFormVisible=true" style="height:40px;" >New {{ typeActiveName }}</el-button>
+        <el-button size="medium" type="primary" icon="el-icon-copy-document" v-if="checkPermission(['admin'])" @click="createForm.dialogCreateFormVisible=true" style="height:40px;" >New {{ typeActiveName }}</el-button>
     </el-row>
     <el-row style="float:right;margin-top: 15px;margin-right:35px;"  v-if="value=='firestrike-oregon-prod-2'">
-        <el-button size="medium" type="primary" icon="el-icon-upload" @click="serverlist.dialogServerlistVisible=true" v-if="checkPermission(['admin','Operation']) && typeActiveName=='world'" style="height:40px;">serverlist</el-button>
+        <el-button size="medium" type="primary" icon="el-icon-upload" @click="serverlist.dialogServerlistVisible=true" v-if="checkPermission(['admin']) && typeActiveName=='world'" style="height:40px;">serverlist</el-button>
     </el-row>
     <el-row style="float:right;margin-top: 15px;margin-right:35px;"  v-if="value=='firestrike-oregon-prod-2'">
-        <el-button size="medium" type="primary" icon="el-icon-upload" @click="notice.dialogNoticeVisible=true" v-if="checkPermission(['admin','Operation']) && typeActiveName=='world'" style="height:40px;">notice</el-button>
+        <el-button size="medium" type="primary" icon="el-icon-upload" @click="notice.dialogNoticeVisible=true" v-if="checkPermission(['admin']) && typeActiveName=='world'" style="height:40px;">notice</el-button>
     </el-row>
     <el-tabs style="margin-top: 10px" type="card" v-model="typeActiveName" @tab-click="typehandleClick" v-if="value!=''">
       <el-tab-pane label="world" name="world"></el-tab-pane>
       <el-tab-pane label="copymap" name="copymap"></el-tab-pane>
     </el-tabs>
     <el-card class="box-card" shadow="hover" :style="value!='' ? 'margin-top:-16px' : 'margin-top:10px'" :body-style="{ padding: '10px' }">
-      <el-button size="small"  icon="el-icon-odometer" v-if="checkPermission(['admin','Operation']) && value != ''" @click="beforeUpdate()">Upgrade</el-button>
-      <el-button size="small"  icon="el-icon-document-copy" v-if="checkPermission(['admin','Operation']) && value != ''" @click="beforeBackup()">Backup</el-button>
-      <el-button size="small"  icon="el-icon-document-copy" v-if="checkPermission(['admin','Operation']) && value != ''" @click="operateHistory()">Result</el-button>
+      <el-button size="small"  icon="el-icon-odometer" v-if="checkPermission(['admin']) && value != ''" @click="beforeUpdate()">Upgrade</el-button>
+      <el-button size="small"  icon="el-icon-document-copy" v-if="checkPermission(['admin']) && value != ''" @click="beforeBackup()">Backup</el-button>
+      <el-button size="small"  icon="el-icon-document-copy" v-if="checkPermission(['admin']) && value != ''" @click="operateHistory()">Result</el-button>
     </el-card>
     <el-row>
         <el-table :data="tableDataList.slice((pagination.world.currentPage-1)*pagination.world.size,pagination.world.currentPage*pagination.world.size)" 
@@ -59,7 +59,7 @@
               </el-tooltip>
             </template>
           </el-table-column>
-          <el-table-column label="port_open" align="center" min-width="100px" v-if="checkPermission(['admin','Operation']) && value=='firestrike-oregon-prod-2'">
+          <el-table-column label="port_open" align="center" min-width="100px" v-if="checkPermission(['admin']) && value=='firestrike-oregon-prod-2'">
             <template slot-scope="scope">
               <el-tag :type="scope.row.port_open === true ? 'success' : 'info'">
                 {{ scope.row.port_open === true ? 'open' : 'close' }}
@@ -72,7 +72,7 @@
           <el-table-column label="操作" align="center" min-width="250px">
             <template slot-scope="scope">
               <el-button size="small" type="primary" icon="el-icon-chat-line-square" @click="getHistory(scope.row.id)">History</el-button>
-              <el-button size="small" type="warning" icon="el-icon-refresh-left" v-if="checkPermission(['admin','Operation'])" @click="restrtApp.dialogRestartFormVisible=true;restrtApp.restart_world_id=scope.row.id">Restart</el-button>
+              <el-button size="small" type="warning" icon="el-icon-refresh-left" v-if="checkPermission(['admin'])" @click="restrtApp.dialogRestartFormVisible=true;restrtApp.restart_world_id=scope.row.id">Restart</el-button>
               <el-button size="small" type="danger" icon="el-icon-delete" v-if="checkPermission(['admin'])" @click="deleteConfirm(scope.row)">Delete</el-button>
             </template>
           </el-table-column>
@@ -293,8 +293,7 @@
         class="upload-demo"
         ref="upload"
         action=""
-        :on-change = "updatefilechange"
-        :before-upload="beforePicUpload"
+        :http-request="httpRequest"
         :auto-upload="false">
         <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
         <div slot="tip" class="el-upload__tip" style="font-size:16px;margin-top:10px;">只能上传文件，且不超过1mb</div>
@@ -464,12 +463,12 @@ export default {
     this.getCluster()
   },
   methods: {
-    //check permission to tab
     checkPermission(roles){
       if ( this.value.indexOf("dev") == -1 ){
         return checkPermission(roles)
       }else{
-        return true
+        roles.push("Development")
+        return checkPermission(roles)
       }
     },
 
@@ -753,20 +752,39 @@ export default {
     },
 
     /// update serverlist
-    updatefilechange(file, fileList){
-      this.serverlist.fileList = fileList  
+    httpRequest(param) {
+    // 一般情况下是在这里创建FormData对象，但我们需要上传多个文件，为避免发送多次请求，因此在这里只进行文件的获取，param可以拿到文件上传的所有信息
+      this.serverlist.fileList.push(param.file)
     },
-    beforePicUpload (file) {
-      const isLt1M = file.size / 1024 / 1024 < 1
-      if (!isLt1M) {
-        this.$message.error('上传文件大小不能超过 1MB!')
+    submitUpload() {
+      var upData = new FormData()
+      this.$refs.upload.submit()
+      this.serverlist.fileList.forEach(function (file) {
+        const size = file.size / 1024 <= 500
+        if (!size) {  //不清楚为什么不能直接使用this.$message，可能因为在forEach里面吧
+          upData.append('error','文件大小不能超过500kb')
+          return false
+        }
+        upData.append('file', file, file.name)
+      })
+      if (upData.get("error")){
+        this.$message({
+          type: 'error',
+          message: upData.get("error")
+        });
         return false
       }
-      var data = new FormData();
-      data.append('file', file);
-      data.append('cluster', this.value);
-      //这里是我将file作为参数传给了我的接口
-      UpdateServerList(data)
+      if (!upData.get("file")){
+        this.$message({
+          type: 'error',                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+          message: '未选择文件,请选择文件后在更新'
+        });
+        return false
+      }
+      upData.append('cluster', this.value);
+      this.serverlist.isServerlistLoading = true
+      //执行后台函数
+      UpdateServerList(upData)
         .then(response => {
           if (response.status == 500){
             this.$message({
@@ -787,18 +805,7 @@ export default {
         this.serverlist.dialogServerlistVisible=false
         console.log(response);
       });
-      return false
-    },
-    submitUpload() {
-      if (this.serverlist.fileList == 0){  //验证filelist是否长度为0，为0就会报错
-        this.$message({
-          type: 'error',
-          message: '请选择文件'
-        });
-        return false
-      }
-      this.serverlist.isServerlistLoading = true
-      this.$refs.upload.submit();
+      // this.$refs.upload.submit();
     },
 
 

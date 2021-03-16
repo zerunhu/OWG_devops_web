@@ -1,7 +1,7 @@
 <template>
   <div class="app-container" >
     <el-row>
-        <el-button size="medium" type="primary" icon="el-icon-download" @click="dialogbranchVisible=true;" style="float:left; margin: 2px;">同步代码</el-button>
+        <el-button size="medium" type="primary" icon="el-icon-download" v-if="checkPermission('admin','Development')" @click="dialogbranchVisible=true;" style="float:left; margin: 2px;">同步代码</el-button>
     </el-row>
     <el-row style="margin-top: 10px">
         <el-table :data="containerList" border fit highlight-current-row style="width: 100%" >
@@ -150,7 +150,7 @@ export default {
       if (user == this.user_name){
         return true
       }else{
-        return checkPermission(["admin"])
+        return checkPermission(["admin","Development"])
       }
     },
     getEcraddr(){

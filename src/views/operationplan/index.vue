@@ -8,7 +8,7 @@
       to download the serverlist file in aws
     </aside> -->
     <el-row style="float:right;margin:5px 25px 10px 0;z-index:1000">
-      <el-button size="medium" type="primary" icon="el-icon-copy-document" v-if="tableloading!=true" style="height:40px;" @click="adddialog()">New Plan</el-button>
+      <el-button size="medium" type="primary" icon="el-icon-copy-document" v-if="tableloading!=true && checkPermission(['admin','Operation'])" style="height:40px;" @click="adddialog()">New Plan</el-button>
     </el-row>
     <el-tabs style="margin-top: 30px" type="card" v-if="tableloading!=true" v-model="paneActiveName" @tab-click="handleClick">
       <el-tab-pane label="更新计划" name="update"></el-tab-pane>
@@ -19,7 +19,7 @@
           <el-table-column label="world" align="center" min-width="100px">
             <template slot-scope="scope"> 
                {{ scope.row.world.split(",")[0] }}
-               <el-tooltip class="item" effect="dark" content="show more world" placement="top-start">
+               <el-tooltip class="item" effect="dark" content="show more world" placement="top-start" v-if="paneActiveName=='update'">
                 <a><i class="el-icon-info" @click="dialogWorldInfo(scope.row.id)"></i></a>
                </el-tooltip>
             </template>
@@ -45,13 +45,13 @@
           </el-table-column>
           <el-table-column label="操作"  align="center" min-width="200px">
             <template slot-scope="scope">
-                <el-button type="primary" size="small" :disabled="scope.row.result | completebool" icon="el-icon-success" @click="completeConfirm(scope.row.id)">
+                <el-button type="primary" size="small" v-if="checkPermission(['admin','Operation'])" :disabled="scope.row.result | completebool" icon="el-icon-success" @click="completeConfirm(scope.row.id)">
                   Complete
                 </el-button>
-                <el-button type="primary" size="small" :disabled="scope.row.result | completebool" icon="el-icon-edit" @click="updateBefore(scope.row)">
+                <el-button type="primary" size="small" v-if="checkPermission(['admin','Operation'])" :disabled="scope.row.result | completebool" icon="el-icon-edit" @click="updateBefore(scope.row)">
                   Edit
                 </el-button>
-                <el-button type="danger" size="small" icon="el-icon-delete" @click="deleteConfirm(scope.row.id)">
+                <el-button type="danger" size="small" v-if="checkPermission(['admin','Operation'])" icon="el-icon-delete" @click="deleteConfirm(scope.row.id)">
                   Delete
                 </el-button>
             </template>
@@ -174,6 +174,7 @@
 </template>
 <script>
 import { getOperationPlan,detailOperationPlan,addOperationPlan,updateOperationPlan,completeOperationPlan,deleteOperationPlan,getImages,getWorlds } from '@/api/operationplan'
+import checkPermission from '@/utils/permission'
 export default {
   filters: {
     completebool(status) {
@@ -232,6 +233,10 @@ export default {
     this.getImages()
   },
   methods:{
+    checkPermission(roles){
+        return checkPermission(roles)
+    },
+
     getImages(){
       getImages("firestrike-oregon-prod-2")
         .then(response => {

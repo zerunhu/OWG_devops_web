@@ -256,7 +256,7 @@ export const asyncRouterMap = [
       path: 'file/list',
       component: () => import('@/views/ci/file/list'),
       name: 'config_file列表',
-      meta: { roles: ['admin',"Development","Operation"] , title: 'Config List' }
+      meta: { roles: ['admin',"Development"] , title: 'Config List' }
     }
     ]
   },
@@ -300,9 +300,9 @@ export const asyncRouterMap = [
     children: [
       {
         path: 'index',
-        name: 'Plan',
+        name: 'Operation Plan',
         component: () => import('@/views/operationplan/index'),
-        meta: { title: 'Plan', icon: 'form' }
+        meta: { title: 'Operation Plan', icon: 'form' }
       }
     ]
   },
