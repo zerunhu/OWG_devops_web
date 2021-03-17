@@ -11,12 +11,12 @@
     <el-row style="float:right;margin-top: 15px;margin-right:25px;"  v-if="value!=''">
         <el-button size="medium" type="primary" icon="el-icon-copy-document" v-if="checkPermission(['admin'])" @click="createForm.dialogCreateFormVisible=true" style="height:40px;" >New {{ typeActiveName }}</el-button>
     </el-row>
-    <el-row style="float:right;margin-top: 15px;margin-right:35px;"  v-if="value=='firestrike-oregon-prod-2'">
-        <el-button size="medium" type="primary" icon="el-icon-upload" @click="serverlist.dialogServerlistVisible=true" v-if="checkPermission(['admin']) && typeActiveName=='world'" style="height:40px;">serverlist</el-button>
+    <el-row style="float:right;margin-top: 15px;margin-right:35px;"  v-if="value=='firestrike-oregon-prod-2' && checkPermission(['admin']) && typeActiveName=='world'">
+        <el-button size="medium" type="primary" icon="el-icon-upload" @click="cloudFront.dialogVisible=true" style="height:40px;">CloudFront</el-button>
     </el-row>
-    <el-row style="float:right;margin-top: 15px;margin-right:35px;"  v-if="value=='firestrike-oregon-prod-2'">
+    <!-- <el-row style="float:right;margin-top: 15px;margin-right:35px;"  v-if="value=='firestrike-oregon-prod-2'">
         <el-button size="medium" type="primary" icon="el-icon-upload" @click="notice.dialogNoticeVisible=true" v-if="checkPermission(['admin']) && typeActiveName=='world'" style="height:40px;">notice</el-button>
-    </el-row>
+    </el-row> -->
     <el-tabs style="margin-top: 10px" type="card" v-model="typeActiveName" @tab-click="typehandleClick" v-if="value!=''">
       <el-tab-pane label="world" name="world"></el-tab-pane>
       <el-tab-pane label="copymap" name="copymap"></el-tab-pane>
@@ -24,6 +24,7 @@
     <el-card class="box-card" shadow="hover" :style="value!='' ? 'margin-top:-16px' : 'margin-top:10px'" :body-style="{ padding: '10px' }">
       <el-button size="small"  icon="el-icon-odometer" v-if="checkPermission(['admin']) && value != ''" @click="beforeUpdate()">Upgrade</el-button>
       <el-button size="small"  icon="el-icon-document-copy" v-if="checkPermission(['admin']) && value != ''" @click="beforeBackup()">Backup</el-button>
+      <el-button size="small"  icon="el-icon-document-copy" v-if="checkPermission(['admin']) && value == 'firestrike-oregon-prod-2' && typeActiveName == 'world'" @click="beforeSecurityGroup()">Security</el-button>
       <el-button size="small"  icon="el-icon-document-copy" v-if="checkPermission(['admin']) && value != ''" @click="operateHistory()">Result</el-button>
     </el-card>
     <el-row>
@@ -149,9 +150,9 @@
       </div>
     </el-dialog>
     <!-- backup dialog -->
-    <el-dialog title="Update" :visible.sync="backupForm.dialogBackupFormVisible" width="40%" :closeOnClickModal=false :showClose=false>
-      <el-form :model="updateForm">
-        <el-form-item :label="updateForm.label_name" label-width="110px">
+    <el-dialog title="Backup" :visible.sync="backupForm.dialogBackupFormVisible" width="40%" :closeOnClickModal=false :showClose=false>
+      <el-form>
+        <el-form-item label="world_name" label-width="110px">
           <el-input v-model="batchOperate.multipleName" autocomplete="off" :disabled="true"></el-input>
         </el-form-item>
         <p style="margin-left:15px">请确认上述需要备份的服务器列表！ </p>
@@ -162,9 +163,23 @@
         <el-button type="primary" @click="BackupRedis()">确认</el-button>
       </div>
     </el-dialog>
+    <!-- switch securitygroup dialog -->
+    <el-dialog title="securityGroup" :visible.sync="batchSecurityGroup.dialogVisible" width="40%" :closeOnClickModal=false :showClose=false>
+      <el-form>
+        <el-form-item label="world_name" label-width="110px">
+          <el-input v-model="batchOperate.multipleName" autocomplete="off" :disabled="true"></el-input>
+        </el-form-item>
+        <p style="margin-left:15px">请确认上述需要切换安全组策略的服务器列表！ </p>
+        <p style="margin-left:15px">同时请确认服务器已经对外停止工作！此操作将<b style="color:red">关闭所有服务端入口，并且强制踢除玩家下线</b></p>
+      </el-form>
+      <div slot="footer" class="dialog-footer" style="margin-top:-30px">
+        <el-button @click="batchSecurityGroup.dialogVisible = false; dialogDestry('安全组操作')">取 消</el-button>
+        <el-button type="primary" @click="batchUpdateSecurityGroup()">确认</el-button>
+      </div>
+    </el-dialog>
     <!-- result dialog、 -->
     <el-dialog title="Batch operation result" :visible.sync="batchResult.dialogResultVisible" width="40%" :closeOnClickModal=false>
-      <el-tabs v-model="batchResult.activeName" @tab-click="batchResultTabClick" style="margin-top:-30px;">
+      <el-tabs type="card" v-model="batchResult.activeName" @tab-click="batchResultTabClick" style="margin-top:-30px;">
         <el-tab-pane label="update" name="update">
           <el-table :data="batchResult.data.slice((pagination.operatehistory.currentPage-1)*pagination.operatehistory.size,pagination.operatehistory.currentPage*pagination.operatehistory.size)" border fit highlight-current-row style="width: 100%">
             <el-table-column align="center" label="Revision" min-width="65">
@@ -248,6 +263,48 @@
             </el-pagination>
           </div>
         </el-tab-pane>
+
+        <el-tab-pane label="securityGroup" name="securityGroup">
+          <el-table :data="batchResult.data.slice((pagination.operatehistory.currentPage-1)*pagination.operatehistory.size,pagination.operatehistory.currentPage*pagination.operatehistory.size)" border fit highlight-current-row style="width: 100%">
+            <el-table-column align="center" label="Revision" min-width="65">
+              <template slot-scope="scope">
+                <span>{{ scope.row.revision }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="World" min-width="110">
+              <template slot-scope="scope">
+                <span>{{ scope.row.world }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="140px" align="center" label="Date">
+              <template slot-scope="scope">
+                <span>{{ scope.row.time.split(".")[0] }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="Status" align="center" min-width="110">
+              <template slot-scope="scope">
+                <el-tag :type="scope.row.result | statusFilter">
+                  {{ scope.row.result }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="Reason" min-width="110">
+              <template slot-scope="scope">
+                <el-button type="primary" size="small" @click="showResultReason(scope)">查看详情</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <div class="block" style="margin-left:40%">
+            <el-pagination
+              :hide-on-single-page=true
+              @current-change="paginationCurrentChange"
+              :current-page="pagination.operatehistory.currentPage"
+              layout="prev, pager, next"
+              :page-size=pagination.operatehistory.size
+              :total=batchResult.data.length>
+            </el-pagination>
+          </div>
+        </el-tab-pane>
       </el-tabs>
     </el-dialog>
     <!-- showResultReason  -->
@@ -287,22 +344,66 @@
         <el-button type="primary" :loading=restrtApp.isRestartLoading @click="RestartApp()">确认</el-button>
       </div>
     </el-dialog>
-    <!-- serverlist update dialog -->
-    <el-dialog title="Update ServerList" :visible.sync="serverlist.dialogServerlistVisible" width="40%" :closeOnClickModal=false>
-      <el-upload
-        class="upload-demo"
-        ref="upload"
-        action=""
-        :http-request="httpRequest"
-        :auto-upload="false">
-        <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-        <div slot="tip" class="el-upload__tip" style="font-size:16px;margin-top:10px;">只能上传文件，且不超过1mb</div>
-      </el-upload>
-      <div slot="footer" class="dialog-footer"  style="margin-top: -15px;">
-        <el-button type="primary" @click="online_serverlist.dialogEditonlineVisible=true;serverlist.dialogServerlistVisible=false">在线编辑</el-button>
-        <el-button type="primary" :loading=serverlist.isServerlistLoading @click="submitUpload">Update</el-button>
-      </div>
+
+    <!-- cloudfront -->
+    <el-dialog title="CloudFront" :visible.sync="cloudFront.dialogVisible" width="40%" :closeOnClickModal=false>
+      <el-tabs type="card" v-model="cloudFront.ActiveName" style="margin-top:-20px">
+        <!-- serverlist -->
+        <el-tab-pane label="serverlist" name="serverlist" style="margin-top:10px;margin-left:10px">
+          <el-upload
+          class="upload-demo"
+          ref="upload"
+          action=""
+          :http-request="httpRequest"
+          :auto-upload="false">
+            <el-button slot="trigger" type="primary">选取文件</el-button>
+            <div slot="tip" class="el-upload__tip" style="font-size:16px;margin-top:10px;">只能上传文件，且不超过1mb</div>
+          </el-upload>
+          <div style="margin-top:30px;float:right;margin-right:30px">
+            <el-button type="primary" @click="online_serverlist.dialogEditonlineVisible=true;serverlist.dialogServerlistVisible=false">在线编辑</el-button>
+            <el-button type="primary" :loading=serverlist.isServerlistLoading @click="submitUpload">Update</el-button>
+          </div>
+        </el-tab-pane>
+        <!-- client serverlist -->
+        <el-tab-pane label="clientlist" name="clientlist">
+          <el-form :model="clientlist" :rules="rules" style="margin-top:10px">
+            <el-form-item label="clientversion" label-width="110px" prop="clientversion">
+              <el-input v-model="clientlist.clientversion" autocomplete="off"></el-input>
+            </el-form-item>
+          </el-form>
+          <el-upload style="margin-left:10px"
+          class="upload-demo"
+          ref="upload"
+          action=""
+          :http-request="clientListHttpRequest"
+          :auto-upload="false">
+            <el-button slot="trigger" type="primary">选取文件</el-button>
+            <div slot="tip" class="el-upload__tip" style="font-size:16px;margin-top:10px;">只能上传文件，且不超过500kb</div>
+          </el-upload>
+          <div style="margin-top:30px;float:right;margin-right:30px">
+            <el-button type="primary" :loading=serverlist.isServerlistLoading @click="clientSubmitUpload" :disabled="clientlist.disable">Update</el-button>
+          </div>
+        </el-tab-pane>
+        <!-- notice  -->
+        <el-tab-pane label="notice" name="notice">
+          <el-form :model="notice" :rules="rules">
+            <el-form-item label="old_version" label-width="110px" prop="old_version">
+              <el-input v-model="notice.old_version" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="new_version" label-width="110px" prop="new_version">
+              <el-input v-model="notice.new_version"></el-input>
+            </el-form-item>
+          </el-form>
+          <p style="margin-top: 5px;margin-left: 15px;">请填写客户端版本号，玩家在打开旧版本客户端时弹出提示，要求玩家升级到新版本</p>
+          <br>
+          <p style="margin-top: -10px;margin-left: 15px;color:red">格式: x.x.x  (x表示为数字)</p>
+          <div style="margin-top:30px;float:right;margin-right:30px">
+            <el-button type="primary" :loading=notice.isNoticeLoading @click="updateNotice" :disabled="notice.disablenew || notice.disableold">Update</el-button>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
     </el-dialog>
+
     <!-- serverlist update editonline dialog -->
     <el-dialog title="Update ServerList" :visible.sync="online_serverlist.dialogEditonlineVisible" width="40%" :closeOnClickModal=false>
       <el-form :model="online_serverlist" :rules="rules"> 
@@ -314,24 +415,7 @@
       <br>
       <p style="margin-top: -20px;margin-left: 15px;color:red">格式: x.x.x  (x表示为数字)</p>
       <div slot="footer" class="dialog-footer"  style="margin-top: -35px;">
-        <router-link style="margin-right:15px" :to="{path:'/deploy/world/serverlist/',query:{cluster_name:this.value,serverlist_version:this.online_serverlist.version}}"><el-button type="primary">确认</el-button></router-link>
-      </div>
-    </el-dialog>
-    <!-- notice update dialog -->
-    <el-dialog title="Update Notice" :visible.sync="notice.dialogNoticeVisible" width="40%" :closeOnClickModal=false>
-      <el-form :model="notice" :rules="rules">
-        <el-form-item label="old_version" label-width="110px" prop="old_version">
-          <el-input v-model="notice.old_version" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="new_version" label-width="110px" prop="new_version">
-          <el-input v-model="notice.new_version"></el-input>
-        </el-form-item>
-      </el-form>
-      <p style="margin-top: 5px;margin-left: 15px;">请填写客户端版本号，玩家在打开旧版本客户端时弹出提示，要求玩家升级到新版本</p>
-      <br>
-      <p style="margin-top: -10px;margin-left: 15px;color:red">格式: x.x.x  (x表示为数字)</p>
-      <div slot="footer" class="dialog-footer"  style="margin-top: -35px;">
-        <el-button type="primary" :loading=notice.isNoticeLoading @click="updateNotice">Update</el-button>
+        <router-link style="margin-right:15px" :to="{path:'/deploy/world/serverlist/',query:{cluster_name:this.value,serverlist_version:this.online_serverlist.version}}"><el-button type="primary" :disabled="serverlist.disable">确认</el-button></router-link>
       </div>
     </el-dialog>
   </div>
@@ -339,7 +423,7 @@
 </template>
 
 <script>
-import { getCluster,getWorld,createWorld,getImages,updateWorld,deleteWorld,GetRealLog,DeleteRealLog,GetWorldStatus,getHistory,RestartApp,BackupRedis,UpdateSecurityGroup,UpdateServerList,updateNotice,operateHistory } from '@/api/cd/world.js'
+import { getCluster,getWorld,createWorld,getImages,updateWorld,deleteWorld,GetRealLog,DeleteRealLog,GetWorldStatus,getHistory,RestartApp,BackupRedis,UpdateSecurityGroup,batchUpdateSecurityGroup,UpdateServerList,UpdateClientList,updateNotice,operateHistory } from '@/api/cd/world.js'
 import checkPermission from '@/utils/permission'
 export default {
   filters: {
@@ -354,12 +438,40 @@ export default {
   },
   data() {
     let reg = /^\d+\.\d+\.\d+$/
-    var checkVersion = (rule, value, callback) => {
-      console.log(value)
+    var checkVersion_clientlist = (rule, value, callback) => {
       if (!reg.test(value)) {
-          callback(new Error('请按照格式规定输入version'))
+        this.clientlist.disable = true
+        callback(new Error('请按照格式规定输入version'))
       } else {
-          callback()
+        this.clientlist.disable = false
+        callback()
+      }
+    }
+    var checkVersion_serverlist = (rule, value, callback) => {
+      if (!reg.test(value)) {
+        this.serverlist.disable = true
+        callback(new Error('请按照格式规定输入version'))
+      } else {
+        this.serverlist.disable = false
+        callback()
+      }
+    }
+    var checkVersion_noticenew = (rule, value, callback) => {
+      if (!reg.test(value)) {
+        this.notice.disablenew = true
+        callback(new Error('请按照格式规定输入version'))
+      } else {
+        this.notice.disablenew = false
+        callback()
+      }
+    }
+    var checkVersion_noticeold = (rule, value, callback) => {
+      if (!reg.test(value)) {
+        this.notice.disableold = true
+        callback(new Error('请按照格式规定输入version'))
+      } else {
+        this.notice.disableold = false
+        callback()
       }
     }
 
@@ -381,10 +493,22 @@ export default {
           size: 5,
         },
       },
+
+      cloudFront: {
+        dialogVisible: false,
+        ActiveName: "serverlist",
+      },
+      clientlist: {
+        clientversion: "",
+        fileList: [],
+        isLoading: false,
+        disable: true,
+      },
       serverlist: {
         fileList: [],
         dialogServerlistVisible: false,
         isServerlistLoading: false,
+        disable: true,
       },
       online_serverlist: {
         version: "",
@@ -395,17 +519,22 @@ export default {
         new_version: "",
         isNoticeLoading: false,
         dialogNoticeVisible: false,
+        disableold: true,
+        disablenew: true,
       },
       //notice新旧版本验证规则
       rules:{
         old_version: [
-          { validator: checkVersion, trigger: 'blur' }
+          { validator: checkVersion_noticeold, trigger: 'blur' }
         ], 
         new_version: [
-          { validator: checkVersion, trigger: 'blur' }
+          { validator: checkVersion_noticenew, trigger: 'blur' }
         ], 
         version: [
-          { validator: checkVersion, trigger: 'blur' }
+          { validator: checkVersion_serverlist, trigger: 'blur' }
+        ], 
+        clientversion: [
+          { validator: checkVersion_clientlist, trigger: 'blur' }
         ], 
       },
       createForm: {
@@ -423,6 +552,9 @@ export default {
       },
       backupForm: {
         dialogBackupFormVisible: false,
+      },
+      batchSecurityGroup: {
+        dialogVisible: false,
       },
       batchOperate: {
         multipleId: [],
@@ -493,9 +625,9 @@ export default {
     // switch world type world/global
     typehandleClick(tab, event) {
       this.getWorld()
-      // this.create_Value = this.typeActiveName
-      // this.createForm.label_name = this.typeActiveName+"_id"
-      // this.updateForm.label_name = this.typeActiveName+"_name"
+      this.batchOperate.multipleId = []
+      this.batchOperate.multipleName = ""
+      this.$refs.multipleTable.clearSelection();
     },
 
     //get world  and set init value 
@@ -808,6 +940,62 @@ export default {
       // this.$refs.upload.submit();
     },
 
+    //update file clientlist
+    clientListHttpRequest(param) {
+    // 一般情况下是在这里创建FormData对象，但我们需要上传多个文件，为避免发送多次请求，因此在这里只进行文件的获取，param可以拿到文件上传的所有信息
+      this.clientlist.fileList.push(param.file)
+    },
+    clientSubmitUpload() {
+      var upData = new FormData()
+      this.$refs.upload.submit()
+      this.clientlist.fileList.forEach(function (file) {
+        const size = file.size / 1024 <= 500
+        if (!size) {  //不清楚为什么不能直接使用this.$message，可能因为在forEach里面吧
+          upData.append('error','文件大小不能超过500kb')
+          return false
+        }
+        upData.append('file', file, file.name)
+      })
+      if (upData.get("error")){
+        this.$message({
+          type: 'error',
+          message: upData.get("error")
+        });
+        return false
+      }
+      if (!upData.get("file")){
+        this.$message({
+          type: 'error',                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+          message: '未选择文件,请选择文件后在更新'
+        });
+        return false
+      }
+      upData.append('cluster', this.value);
+      upData.append('version', this.clientlist.clientversion);
+      this.clientlist.isLoading = true
+      //执行后台函数
+      UpdateClientList(upData)
+        .then(response => {
+          if (response.status == 500){
+            this.$message({
+              type: 'error',
+              message: response.message
+            });
+          }else{
+            this.$message({
+              message: '更新成功',
+              type: 'success'
+            })
+          }
+          this.clientlist.isLoading=false
+          console.log(response);
+      }, response => {
+        this.clientlist.isLoading=false
+        console.log(response);
+      });
+      // this.$refs.upload.submit();
+    },
+
 
     //update notice
     updateNotice(){
@@ -864,7 +1052,7 @@ export default {
       })
     },
     Update_security_group(row,instance,done){
-      UpdateSecurityGroup(row.id,{"port_open": !row.port_open})
+      UpdateSecurityGroup(row.id)
       .then(response => {
           if (response.status == 500){
             this.$message({
@@ -881,6 +1069,31 @@ export default {
           instance.confirmButtonLoading = false;
           done();
           console.log(response);
+      }, response => {
+          console.log(response);
+      }) 
+    },
+    //batch security group
+    beforeSecurityGroup(){
+      if(this.batchOperate.multipleName==""){
+        this.$message({
+          message: '请先选择需要操作的world',
+          type: 'warning'
+        });
+      }else{
+        this.batchSecurityGroup.dialogVisible = true;
+      }
+    },
+    batchUpdateSecurityGroup(){
+      this.batchResult.activeName = "securityGroup"
+      batchUpdateSecurityGroup({"world_list": this.batchOperate.multipleId})
+      .then(response => {
+          this.$notify({
+            title: '更新开始', 
+            // type: 'success',
+            message: this.$createElement('i', { style: 'color: teal'}, '操作已经开始,请前往Result界面查看结果')
+          });
+          this.batchSecurityGroup.dialogVisible = false;
       }, response => {
           console.log(response);
       }) 

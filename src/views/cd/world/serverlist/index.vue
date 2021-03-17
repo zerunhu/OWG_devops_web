@@ -11,8 +11,8 @@
       <el-button size="medium" type="primary" icon="el-icon-copy-document" style="height:40px;" @click="dialogCreateFormVisible=true">New Line</el-button>
     </el-row>
     <el-row>
-        <el-table v-loading="tableloading" :data="serverlist" border fit highlight-current-row style="width: 100%" >
-          <el-table-column label="id" align="center" min-width="80px">
+        <el-table v-loading="tableloading" :data="serverlist" border fit highlight-current-row style="width: 100%" :default-sort="{prop: 'id'}">
+          <el-table-column label="id" align="center" min-width="80px" sortable prop="id">
             <template slot-scope="scope"> {{ scope.row.id  }} </template>
           </el-table-column>
           <el-table-column label="name" align="center" min-width="150px">

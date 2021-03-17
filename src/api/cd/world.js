@@ -105,13 +105,30 @@ export function UpdateServerList(data) {
     data
   })
 }
-export function UpdateSecurityGroup(pk,data) {
+
+export function UpdateClientList(data) {
+  return request({
+    url: '/api/world/clientlist/',
+    method: 'post',
+    headers: {'Content-Type': 'multipart/form-data'},
+    data
+  })
+}
+
+export function UpdateSecurityGroup(pk) {
   return request({
     url: '/api/world/'+pk+"/securitygroup/",
+    method: 'post',
+  })
+}
+export function batchUpdateSecurityGroup(data) {
+  return request({
+    url: '/api/world/batchsecuritygroup/',
     method: 'post',
     data
   })
 }
+
 export function getServerlistonline(cluster_name,version) {
   return request({
     url: '/api/world/serverlistonline/',
