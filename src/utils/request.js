@@ -18,13 +18,13 @@ service.interceptors.request.use(
       // let each request carry token
       // ['X-Token'] is a custom headers key
       // please modify it according to the actual situation
-      config.headers['Authorization'] = "JWT " +getToken()
+      config.headers['Authorization'] = "JWT " + getToken()
     }
     return config
   },
   error => {
     // do something with request error
-    console.log(error) // for debug
+    // console.log(error) // for debug
     return Promise.reject(error)
   }
 )
@@ -44,9 +44,9 @@ service.interceptors.response.use(
   response => {
     const res = response
     // if the custom code is not 200, it is judged as an error.
-    if (res.code > 302) {
+    if (res.data.code > 302) {
       Message({
-        message: res || 'Error',
+        message: res.data.msg || 'Error',
         type: 'error',
         duration: 5 * 1000
       })
@@ -56,13 +56,19 @@ service.interceptors.response.use(
     }
   },
   error => {
-    // console.log(response)
-    console.log(error) // for debug
-    Message({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000
-    })
+    if (error.message.indexOf("403") != -1){
+      Message({
+        message: "您没有执行该任务的权限",
+        type: 'error',
+        duration: 5 * 1000
+      })
+    }else{
+      Message({
+        message: "服务器内部错误，请联系管理员",
+        type: 'error',
+        duration: 5 * 1000
+      })
+    }
     return Promise.reject(error)
   }
 )

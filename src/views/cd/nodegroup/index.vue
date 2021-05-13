@@ -32,8 +32,8 @@
           </el-table-column>
           <el-table-column label="操作" align="center"  min-width="300px">
             <template slot-scope="scope">
-                <el-button size="small" type="primary" icon="el-icon-connection" v-if="checkPermission(['admin'])" :loading=scope.row.pushloading @click="sacleFrom(scope.row)">scale</el-button>
-                <el-button size="small" type="danger" icon="el-icon-delete" v-if="checkPermission(['admin'])" >delete</el-button>
+                <el-button size="small" type="primary" icon="el-icon-connection" v-if="checkPermission(['NODEGROUP_UPDATE'])" :loading=scope.row.pushloading @click="sacleFrom(scope.row)">scale</el-button>
+                <el-button size="small" type="danger" icon="el-icon-delete" v-if="checkPermission(['NODEGROUP_DELETE'])">delete</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -95,12 +95,20 @@ export default {
   },
   methods: {
     checkPermission(roles){
-      if ( this.value.indexOf("dev") == -1 ){
-        return checkPermission(roles)
-      }else{
-        roles.push("Development")
-        return checkPermission(roles)
+      if ( this.value.indexOf("dev") != -1 ){
+        roles.forEach((item, index, input) =>{
+          input[index] = "DEV_" + item 
+        })
+      }else if ( this.value.indexOf("qa") != -1 ){
+        roles.forEach((item, index, input) =>{
+          input[index] = "QA_" + item 
+        })
+      }else if ( this.value.indexOf("prod") != -1 ){
+        roles.forEach((item, index, input) =>{
+          input[index] = "PROD_" + item 
+        })
       }
+      return checkPermission(roles)
     },
     getCluster(){
       getCluster()

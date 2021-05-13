@@ -5,8 +5,15 @@ import { asyncRouterMap, constantRoutes } from '@/router'
  * @param roles
  * @param route
  */
+// function hasPermission(roles, route) {
+//   if (route.meta && route.meta.roles) {   //检查route.meta的roles如果有，就匹配下面的规则，主要是来过滤roles和meta.role
+//     return roles.some(role => route.meta.roles.includes(role))
+//   } else {
+//     return true   //没有定义权限直接默认是true允许访问
+//   }
+// }
 function hasPermission(roles, route) {
-  if (route.meta && route.meta.roles) {   //检查route.meta的roles如果有，就匹配下面的规则，主要是来过滤roles和meta.role
+  if (route.meta && route.meta.roles) {   
     return roles.some(role => route.meta.roles.includes(role))
   } else {
     return true   //没有定义权限直接默认是true允许访问
@@ -22,6 +29,7 @@ export function filterAsyncRoutes(routes, roles) {
   const res = []
   routes.forEach(route => {
     const tmp = { ...route }   //遍历所有的routes的路由
+    // console.log(tmp)
     if (hasPermission(roles, tmp)) {  //判断是否有用户的role是否在route路由里有权限
       if (tmp.children) {   
         tmp.children = filterAsyncRoutes(tmp.children, roles)  //遍历子来吧所有的子路由权限判断
@@ -46,14 +54,22 @@ const mutations = {
 }
 
 const actions = {
+  // generateRoutes({ commit }, roles) {
+  //   return new Promise(resolve => {
+  //     let accessedRoutes
+  //     if (roles.includes('admin')) {   //如果用户是admin的话，直接给所有的权限
+  //       accessedRoutes = asyncRouterMap || []
+  //     } else {
+  //       accessedRoutes = filterAsyncRoutes(asyncRouterMap, roles)   //得到用户能访问的页面
+  //     }
+  //     commit('SET_ROUTES', accessedRoutes)
+  //     resolve(accessedRoutes)
+  //   })
+  // }
   generateRoutes({ commit }, roles) {
     return new Promise(resolve => {
       let accessedRoutes
-      if (roles.includes('admin')) {   //如果用户是admin的话，直接给所有的权限
-        accessedRoutes = asyncRouterMap || []
-      } else {
-        accessedRoutes = filterAsyncRoutes(asyncRouterMap, roles)   //得到用户能访问的页面
-      }
+      accessedRoutes = filterAsyncRoutes(asyncRouterMap, roles)   //得到用户能访问的页面
       commit('SET_ROUTES', accessedRoutes)
       resolve(accessedRoutes)
     })

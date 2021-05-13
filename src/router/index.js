@@ -183,40 +183,45 @@ export const constantRoutes = [
 ]
 
 export const asyncRouterMap = [
-  {
-    path: '/permission',
-    component: Layout,
-    name: 'Permission',
-    alwaysShow: true,
-    meta: { roles: ['admin'] , title: "Permission", icon: 'edit' }, 
-    children: [
-    { 
-      path: 'role',
-      component: () => import('@/views/permission/'),
-      name: 'Role Permission',
-      meta: { roles: ['admin'] , title: "Role Permission" } 
-    },
-    { 
-      path: 'role/:id(\\d+)',
-      component: () => import('@/views/permission/detail'),
-      name: 'role详情',
-      meta: { roles: ['admin'] , title: "RoleDetail" },
-      hidden: true
-    },
-  ]
-  },
+
   {
     path: '/user',
     component: Layout,
     name: 'User',
     alwaysShow: true,
-    meta: { roles: ['admin'] , title: "User", icon: 'user' }, 
+    meta: { title: "User", icon: 'user' }, 
     children: [
     { 
       path: '',
-      component: () => import('@/views/user/'),
-      name: 'User Manager',
-      meta: { roles: ['admin'] , title: "User Manager" } 
+      component: () => import('@/views/user/user/'),
+      name: 'USERS_LIST',
+      meta: { roles: 'USERS_LIST', title: "User Manager", button_roles: '' } 
+    },
+    { 
+      path: 'group',
+      component: () => import('@/views/user/group/'),
+      name: 'GROUPS_LIST',
+      meta: { roles: 'GROUPS_LIST', title: "Group Manager" } 
+    },
+    { 
+      path: 'group/:id(\\d+)',
+      component: () => import('@/views/user/group/user'),
+      name: 'GROUP_USER_LIST',
+      meta: { roles: 'GROUP_USER_LIST', title: "Group Detail" },
+      hidden: true
+    },
+    { 
+      path: 'group/permission/:id(\\d+)',
+      component: () => import('@/views/user/group/permission'),
+      name: 'GROUP_PERMISSION_LIST',
+      meta: { roles: 'GROUP_PERMISSION_LIST', title: "Group Detail" },
+      hidden: true
+    },
+    { 
+      path: 'permission',
+      component: () => import('@/views/user/permission'),
+      name: 'PERMISSION_LIST',
+      meta: { roles: 'PERMISSION_LIST', title: "Permission Manager" } 
     },
   ]
   },
@@ -225,38 +230,25 @@ export const asyncRouterMap = [
     component: Layout,
     name: 'ci',
     alwaysShow: true,
-    meta: { roles: ['admin',"Development","Operation"] , title: "ContinuousIntegra", icon: 'ci' }, //页面需要的权限
+    meta: { title: "ContinuousIntegra", icon: 'ci' }, //页面需要的权限
     children: [
     { 
       path: 'svn',
       component: () => import('@/views/ci/svn/'),
-      name: 'svn测试页面',
-      meta: { roles: ['admin',"Development","Operation"] , title: "Svn List" }  
+      name: 'SVNINFO_LIST',
+      meta: { roles: 'SVNINFO_LIST', title: "Svn List" }  
     },
     { 
       path: 'ci',
       component: () => import('@/views/ci/cicontainers/'),
-      name: '创建ci_container界面',
-      meta: { roles: ['admin',"Development","Operation"] , title: "CI List" }  
+      name: 'CIPROCESS_LIST',
+      meta: { roles: 'CIPROCESS_LIST', title: "CI List" }  
     },
     { 
       path: 'image',
       component: () => import('@/views/ci/ecr/'),
-      name: 'ecr_image信息',
-      meta: { roles: ['admin',"Development","Operation"] , title: "Image List" }  
-    },
-    { 
-      path: 'file/edit/:id(\\d+)',
-      component: () => import('@/views/ci/file/edit'),
-      name: 'config详情修改',
-      meta: { roles: ['admin',"Development","Operation"] , title: "File" },
-      hidden: true
-    },
-    {
-      path: 'file/list',
-      component: () => import('@/views/ci/file/list'),
-      name: 'config_file列表',
-      meta: { roles: ['admin',"Development"] , title: 'Config List' }
+      name: 'CI_IMAGE_LIST',
+      meta: { roles: 'CI_IMAGE_LIST', title: "Image List" }  
     }
     ]
   },
@@ -265,31 +257,31 @@ export const asyncRouterMap = [
     component: Layout,
     name: 'cd',
     alwaysShow: true,
-    meta: { roles: ['admin',"Development","Operation"] , title: "ContinuousDeploy", icon: 'cd' }, //页面需要的权限
+    meta: { title: "ContinuousDeploy", icon: 'cd' }, //页面需要的权限
     children: [
     { 
       path: 'cluster',
       component: () => import('@/views/cd/cluster/'),
-      name: 'cluster',
-      meta: { roles: ['admin',"Development","Operation"] , title: "Cluster" }  
+      name: 'CLUSTER_LIST',
+      meta: { roles: 'CLUSTER_LIST', title: "Cluster" }  
     },
     { 
       path: 'nodegroup',
       component: () => import('@/views/cd/nodegroup/'),
-      name: 'nodegroup',
-      meta: { roles: ['admin',"Development","Operation"] , title: "Nodegroup" }  
+      name: 'NODEGROUP_LIST',
+      meta: { roles: ['PROD_NODEGROUP_LIST', 'DEV_NODEGROUP_LIST'], title: "Nodegroup" }  
     },
     { 
       path: 'world',
       component: () => import('@/views/cd/world/index'),
-      name: 'world',
-      meta: { roles: ['admin',"Development","Operation"] , title: "World" },
+      name: 'WORLD_LIST',
+      meta: { roles: ['QA_WORLD_LIST', 'DEV_WORLD_LIST', 'PROD_WORLD_LIST'], title: "World" },
     },
     { 
       path: 'world/serverlist',
       component: () => import('@/views/cd/world/serverlist'),
-      name: 'world_serverlist',
-      meta: { roles: ['admin',"Development","Operation"] , title: "ServerList"},
+      name: 'WORLD_SERVERLIST',
+      meta: { roles: 'WORLD_SERVERLIST', title: "ServerList"},
       hidden: true,
     },
     ]
@@ -300,9 +292,9 @@ export const asyncRouterMap = [
     children: [
       {
         path: 'index',
-        name: 'Operation Plan',
+        name: 'OPERATIONPLAN_LIST',
         component: () => import('@/views/operationplan/index'),
-        meta: { title: 'Operation Plan', icon: 'form' }
+        meta: { roles: 'OPERATIONPLAN_LIST', title: 'Operation Plan', icon: 'form' }
       }
     ]
   },

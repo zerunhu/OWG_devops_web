@@ -1,30 +1,30 @@
 <template>
   <div class="app-container" >
     <el-row>
-        <el-button size="medium" type="primary" icon="el-icon-download" v-if="checkPermission('admin','Development')" @click="dialogbranchVisible=true;" style="float:left; margin: 2px;">同步代码</el-button>
+        <el-button size="medium" type="primary" icon="el-icon-download" v-if="checkPermission(['CIPROCESS_CREATE'])" @click="dialogbranchVisible=true;" style="float:left; margin: 2px;">Export Code</el-button>
     </el-row>
     <el-row style="margin-top: 10px">
         <el-table :data="containerList" border fit highlight-current-row style="width: 100%" >
-          <el-table-column label="编号" align="center" min-width="140px">
-            <template slot-scope="scope"> {{ scope.row.id  }} </template>
-          </el-table-column>
-          <el-table-column label="svn_num" align="center" min-width="180px">
+          <el-table-column label="svn_num" align="center" min-width="110px">
             <template slot-scope="scope"> {{ scope.row.svn_num }} </template>
+          </el-table-column>
+          <el-table-column label="svn_branch" align="center" min-width="260px">
+            <template slot-scope="scope"> {{ scope.row.svn_branch }} </template>
           </el-table-column>
           <el-table-column label="build_tag" align="center" min-width="280px">
             <template slot-scope="scope"> {{ scope.row.build_tag }}</template>
           </el-table-column>
-          <el-table-column label="author" align="center" min-width="180px">
+          <el-table-column label="author" align="center" min-width="120px">
             <template slot-scope="scope"> {{ scope.row.create_user }} </template>
           </el-table-column>
-          <el-table-column label="created_time" align="center" min-width="240px">
+          <el-table-column label="created_time" align="center" min-width="220px">
             <template slot-scope="scope"> {{ scope.row.created_time }}</template>
           </el-table-column>
-          <el-table-column label="操作" align="center" min-width="300px">
-            <template slot-scope="scope" v-if="checkPermission(scope.row.create_user)">
-                <el-button size="small" type="primary" icon="el-icon-set-up" @click="buildDialog(scope.row.id)">构建</el-button>
-                <el-button size="small" type="primary" icon="el-icon-upload" :loading=scope.row.pushloading @click="pushImage(scope.row)">推送</el-button>
-                <el-button size="small" type="danger" icon="el-icon-delete" @click="deleteConfirm(scope.row.id)">删除</el-button>
+          <el-table-column label="operation" align="center" min-width="320px">
+            <template slot-scope="scope">
+                <el-button size="small" type="primary" icon="el-icon-set-up" @click="buildDialog(scope.row.id)" v-if="checkPermission(['CIPROCESS_BUILD'])">Build</el-button>
+                <el-button size="small" type="primary" icon="el-icon-upload" :loading=scope.row.pushloading @click="pushImage(scope.row)" v-if="checkPermission(['CIPROCESS_PUSH'])">Push</el-button>
+                <el-button size="small" type="danger" icon="el-icon-delete" @click="deleteConfirm(scope.row.id)" v-if="checkPermission(['CIPROCESS_DELETE'])">Delete</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -123,7 +123,7 @@ export default {
                 const nodes = res.map((value, i) => ({
                     value: value,
                     label: value,
-                    leaf: node.level >= 2
+                    // leaf: node.level >= 2
                 }));
                 resolve(nodes);
             })
@@ -146,12 +146,8 @@ export default {
         msg.scrollTop = msg.scrollHeight // 滚动高度
       })
     },
-    checkPermission(user){
-      if (user == this.user_name){
-        return true
-      }else{
-        return checkPermission(["admin","Development"])
-      }
+    checkPermission(roles){
+        return checkPermission(roles)
     },
     getEcraddr(){
       getEcraddr()
@@ -171,20 +167,33 @@ export default {
       buildImage(this.buildForm.id,{ecr_addr: this.buildForm.ecraddr})
         .then(response => {
           if (response.status == 200){
-            this.dialogVisible = true,
-            this.buildloading=false,
-            this.dialogbuildVisible=false,
-            this.result_data = response.message,
-            this.dialogTitle = "构建成功",
-            this.scrollDown()
+            // this.dialogVisible = true,
+            this.buildloading=false
+            this.dialogbuildVisible=false
+            this.getContainer()
+            // this.result_data = response.message,
+            // this.dialogTitle = "构建成功",
+            // this.scrollDown()
+            this.$notify({
+              title: 'BUILD SUCCESS',
+              message: response.message,
+              duration: 30000,
+              type: 'success'
+            });
         }else{
-          this.dialogVisible = true,
-          this.buildloading=false,
-          this.dialogbuildVisible=false,
-          this.result_data = response.message,
-          this.dialogTitle = "构建失败",
-          console.log(response),
-          this.scrollDown()
+          // this.dialogVisible = true,
+          this.buildloading=false
+          this.dialogbuildVisible=false
+          // this.result_data = response.message,
+          // this.dialogTitle = "构建失败",
+          console.log(response)
+          this.$notify({
+            title: 'BUILD FAILED',
+            message: response.message,
+            duration: 30000,
+            type: 'error'
+          });
+          // this.scrollDown()
         }
         });
     },
@@ -193,18 +202,31 @@ export default {
       pushImage(row.id)
         .then(response => {
           if (response.status == 200){
-            this.dialogVisible = true,
-            this.result_data = response.message,
-            this.dialogTitle = "推送成功",
-            this.$set(row,"pushloading",false),
-            this.scrollDown()
+            // this.dialogVisible = true
+            // this.result_data = response.message
+            // this.dialogTitle = "推送成功"
+            this.$set(row,"pushloading",false)
+            this.$notify({
+              title: 'PUSH SUCCESS',
+              message: response.message,
+              duration: 30000,
+              type: 'success'
+            });
+            this.getContainer()
+            // this.scrollDown()
           }else{
-            this.dialogVisible = true,
-            this.result_data = response.message,
-            this.dialogTitle = "推送失败",
-            this.$set(row,"pushloading",false),
-            console.log(response),
-            this.scrollDown()
+            // this.dialogVisible = true
+            // this.result_data = response.message
+            // this.dialogTitle = "推送失败"
+            this.$notify({
+              title: 'PUSH FAILED',
+              message: response.message,
+              duration: 30000,
+              type: 'error'
+            });
+            this.$set(row,"pushloading",false)
+            console.log(response)
+            // this.scrollDown()
           }
         });
     },
@@ -226,21 +248,34 @@ export default {
       createContainer({branch: this.branch[this.branch.length-1]})
         .then(response => {
         if (response.status == 200){
-            this.createLoading = false,
-            this.dialogbranchVisible = false,
-            this.dialogVisible = true,
-            this.result_data = response.message,
-            this.dialogTitle = "同步成功",
-            this.scrollDown()
+            this.createLoading = false
+            this.dialogbranchVisible = false
+            this.$notify({
+              title: 'CREATE SUCCESS',
+              message: response.message,
+              duration: 30000,
+              type: 'success'
+            });
+            this.getContainer()
+            // this.dialogVisible = true,
+            // this.result_data = response.message,
+            // this.dialogTitle = "同步成功",
+            // this.scrollDown()
         }else{
           this.scrollDown()
           this.createLoading = false,
           this.dialogbranchVisible = false,
-          this.dialogVisible = true,
-          this.result_data = response.message,
-          this.dialogTitle = "同步失败",
+          // this.dialogVisible = true,
+          // this.result_data = response.message,
+          // this.dialogTitle = "同步失败",
           console.log(response)
-          this.scrollDown()
+          // this.scrollDown()
+          this.$notify({
+            title: 'CREATE FAILED',
+            message: response.message,
+            duration: 30000,
+            type: 'error'
+          });
         }
         });
     },

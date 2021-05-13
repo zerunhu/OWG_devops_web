@@ -1,11 +1,11 @@
 <template>
   <div class="app-container">
-    <el-button type="primary" @click="dialogVisible = true;getGroups()">New User</el-button>
+    <el-button type="primary" @click="beforeCreate()" v-if="checkPermission(['USERS_CREATE'])" >New User</el-button>
 
     <el-table :data="userList" style="width: 100%;margin-top:30px;" border>
       <el-table-column align="center" label="User_name" width="220">
         <template slot-scope="scope">
-          {{ scope.row.username }}
+          {{ scope.row.name }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="Email" width="220">
@@ -18,11 +18,6 @@
           {{ scope.row.groups }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Last_name">
-        <template slot-scope="scope">
-          {{ scope.row.last_name }}
-        </template>
-      </el-table-column>
       <el-table-column align="center" label="Last_Login">
         <template slot-scope="scope">
           {{ scope.row.last_login }}
@@ -30,7 +25,7 @@
       </el-table-column>
       <el-table-column align="center" label="Operations">
         <template slot-scope="scope">
-          <el-button type="danger" size="small" @click="deleteUser(scope.row)">Delete</el-button>
+          <el-button type="danger" size="small" @click="deleteUser(scope.row)" v-if="checkPermission(['USERS_DELETE'])" >Delete</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -43,14 +38,14 @@
         <el-form-item label="Email">
           <el-input v-model="user.email" placeholder="User Email" />
         </el-form-item>
-        <el-form-item label="Lastname">
-          <el-input v-model="user.last_name" placeholder="Lastname" />
+        <el-form-item label="Phone">
+          <el-input v-model="user.phone" placeholder="User Email" />
         </el-form-item>
         <el-form-item label="Password">
           <el-input show-password v-model="user.password" placeholder="Password" />
         </el-form-item>
         <el-form-item label="Group" label-width="80px">
-          <el-select style="width:220px;" filterable  v-model="user.groups" placeholder="请选择组">
+          <el-select style="width:220px;" multiple filterable  v-model="user.groups" placeholder="请选择组">
             <el-option
               v-for="item in groups"
               :key="item"
@@ -69,8 +64,8 @@
 </template>
 
 <script>
-import { getUser, deleteUser, addUser, getGroups } from '@/api/user'
-
+import { getUser, deleteUser, addUser, getGroups } from '@/api/user/user'
+import checkPermission from '@/utils/permission'
 export default {
   data() {
     return {
@@ -80,9 +75,9 @@ export default {
       user: {
         name: "",
         email: "",
-        last_name: "",
         password: "",
         groups: "",
+        phone: "",
       },
     }
   },
@@ -90,6 +85,9 @@ export default {
     this.getUser()
   },
   methods: {
+    checkPermission(roles){
+        return checkPermission(roles)
+    },
     getUser() {
       getUser()
         .then(response => {
@@ -106,8 +104,13 @@ export default {
         console.log(response);
       });
     },
+    beforeCreate(){
+      this.dialogVisible = true;
+      this.getGroups();
+      this.generatePassword(12)
+    },
     addUser() {
-      addUser({"username":this.user.name,"email":this.user.email,"last_name":this.user.last_name,"password":this.user.password,"groups":this.user.groups})
+      addUser({"user":this.user})
         .then(response => {
           this.getUser()
           this.dialogVisible = false
@@ -127,7 +130,7 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          deleteUser(row.id)
+          deleteUser({"pk":row.id})
           .then(response => {
             this.getUser()
             this.$message({
@@ -151,7 +154,17 @@ export default {
             type: 'info',
             message: '已取消'
         }); 
-    }
+    },
+    generatePassword(pasLen) {
+      var pasArr = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9','_','-','$','%','&','@','+','!'];
+      var password = '';
+      var pasArrLen = pasArr.length;
+      for (var i=0; i<pasLen; i++){
+      var x = Math.floor(Math.random()*pasArrLen);
+      password += pasArr[x];
+      }
+      this.user.password = password
+    },
   }
 }
 </script>

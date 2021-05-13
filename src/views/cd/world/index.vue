@@ -9,9 +9,9 @@
         </el-option>
     </el-select>
     <el-row style="float:right;margin-top: 15px;margin-right:25px;"  v-if="value!=''">
-        <el-button size="medium" type="primary" icon="el-icon-copy-document" v-if="checkPermission(['admin'])" @click="createForm.dialogCreateFormVisible=true" style="height:40px;" >New {{ typeActiveName }}</el-button>
+        <el-button size="medium" type="primary" icon="el-icon-copy-document" v-if="checkPermission(['WORLD_CREATE'])" @click="createHandle()" style="height:40px;" >New {{ typeActiveName }}</el-button>
     </el-row>
-    <el-row style="float:right;margin-top: 15px;margin-right:35px;"  v-if="value=='firestrike-oregon-prod-2' && checkPermission(['admin']) && typeActiveName=='world'">
+    <el-row style="float:right;margin-top: 15px;margin-right:35px;"  v-if="value=='firestrike-oregon-prod-2' && checkPermission(['WORLD_SERVERLIST', 'WORLD_CLIENTLIST', 'WORLD_NOTICE']) && typeActiveName=='world'">
         <el-button size="medium" type="primary" icon="el-icon-upload" @click="cloudFront.dialogVisible=true" style="height:40px;">CloudFront</el-button>
     </el-row>
     <!-- <el-row style="float:right;margin-top: 15px;margin-right:35px;"  v-if="value=='firestrike-oregon-prod-2'">
@@ -22,10 +22,10 @@
       <el-tab-pane label="copymap" name="copymap"></el-tab-pane>
     </el-tabs>
     <el-card class="box-card" shadow="hover" :style="value!='' ? 'margin-top:-16px' : 'margin-top:10px'" :body-style="{ padding: '10px' }">
-      <el-button size="small"  icon="el-icon-odometer" v-if="checkPermission(['admin']) && value != ''" @click="beforeUpdate()">Upgrade</el-button>
-      <el-button size="small"  icon="el-icon-document-copy" v-if="checkPermission(['admin']) && value != ''" @click="beforeBackup()">Backup</el-button>
-      <el-button size="small"  icon="el-icon-document-copy" v-if="checkPermission(['admin']) && value == 'firestrike-oregon-prod-2' && typeActiveName == 'world'" @click="beforeSecurityGroup()">Security</el-button>
-      <el-button size="small"  icon="el-icon-document-copy" v-if="checkPermission(['admin']) && value != ''" @click="operateHistory()">Result</el-button>
+      <el-button size="small"  icon="el-icon-odometer" v-if="checkPermission(['WORLD_UPDATE']) && value != ''" @click="beforeUpdate()">Upgrade</el-button>
+      <el-button size="small"  icon="el-icon-document-copy" v-if="checkPermission(['WORLD_BACKUP']) && value != ''" @click="beforeBackup()">Backup</el-button>
+      <el-button size="small"  icon="el-icon-collection" v-if="checkPermission(['WORLD_SECURITYGROUP']) && value == 'firestrike-oregon-prod-2' && typeActiveName == 'world'" @click="beforeSecurityGroup()">Security</el-button>
+      <el-button size="small"  icon="el-icon-data-analysis" v-if="checkPermission(['WORLD_UPDATE','WORLD_BACKUP','WORLD_SECURITYGROUP']) && value != ''" @click="operateHistory()">Result</el-button>
     </el-card>
     <el-row>
         <el-table :data="tableDataList.slice((pagination.world.currentPage-1)*pagination.world.size,pagination.world.currentPage*pagination.world.size)" 
@@ -34,23 +34,23 @@
           style="width: 100%" tooltip-effect="dark" 
           ref="multipleTable"
           @selection-change="handleSelectionChange">
-          <el-table-column type="selection" align="center" min-width="55" :reserve-selection="true"></el-table-column>
-          <el-table-column label="name" align="center" min-width="100px">
+          <el-table-column type="selection" fixed align="center" min-width="90" :reserve-selection="true"></el-table-column>
+          <el-table-column label="name" fixed align="center" min-width="160px">
             <template slot-scope="scope"> {{ scope.row.name  }} </template>
           </el-table-column>
-          <el-table-column label="create_time" align="center" min-width="140px" sortable prop="create_time"> 
+          <el-table-column label="create_time" align="center" min-width="200px" sortable prop="create_time"> 
             <template slot-scope="scope"> {{ scope.row.create_time.split(".")[0] }}</template>
           </el-table-column>
-          <el-table-column label="update_time" align="center" min-width="140px">
+          <el-table-column label="update_time" align="center" min-width="200px">
             <template slot-scope="scope"> {{ scope.row.update_time.split(".")[0] }} </template>
           </el-table-column>
-          <el-table-column label="image_tag" align="center" min-width="100px">
+          <el-table-column label="image_tag" align="center" min-width="140px">
             <template slot-scope="scope"> {{ scope.row.image_tag }} </template>
           </el-table-column>
-          <el-table-column label="prod_name" align="center" min-width="100px">
+          <el-table-column label="prod_name" align="center" min-width="140px" >
             <template slot-scope="scope"> {{ scope.row.prod_name }} </template>
           </el-table-column>
-          <el-table-column label="healthy_check" align="center" min-width="100px">
+          <el-table-column label="healthy_check" align="center" min-width="150px">
             <template slot-scope="scope">
               <el-tag :type="scope.row.healthy === 'Healthy' ? 'success' : 'info'">
                 {{ scope.row.healthy }}
@@ -60,7 +60,7 @@
               </el-tooltip>
             </template>
           </el-table-column>
-          <el-table-column label="port_open" align="center" min-width="100px" v-if="checkPermission(['admin']) && value=='firestrike-oregon-prod-2'">
+          <el-table-column label="port_open" align="center" min-width="150px" v-if="checkPermission(['WORLD_SECURITYGROUP']) && value=='firestrike-oregon-prod-2' && typeActiveName=='world'">
             <template slot-scope="scope">
               <el-tag :type="scope.row.port_open === true ? 'success' : 'info'">
                 {{ scope.row.port_open === true ? 'open' : 'close' }}
@@ -70,18 +70,19 @@
               </el-tooltip>
             </template>
           </el-table-column>
-          <el-table-column label="操作" align="center" min-width="250px">
+          <el-table-column label="操作" align="center" min-width="450px">
             <template slot-scope="scope">
-              <el-button size="small" type="primary" icon="el-icon-chat-line-square" @click="getHistory(scope.row.id)">History</el-button>
-              <el-button size="small" type="warning" icon="el-icon-refresh-left" v-if="checkPermission(['admin'])" @click="restrtApp.dialogRestartFormVisible=true;restrtApp.restart_world_id=scope.row.id">Restart</el-button>
-              <el-button size="small" type="danger" icon="el-icon-delete" v-if="checkPermission(['admin'])" @click="deleteConfirm(scope.row)">Delete</el-button>
+              <el-button size="small" type="primary" icon="el-icon-chat-line-square" @click="getHistory(scope.row.id)" v-if="checkPermission(['WORLD_HISTORY'])">History</el-button>
+              <el-button size="small" type="primary" icon="el-icon-s-tools" v-if="checkPermission(['WORLD_CLEARDEADNUMBER','WORLD_AUTOCLEARDEADNUMBER']) && value=='firestrike-oregon-prod-2' && typeActiveName == 'world'" @click="gmTool.Visible=true;gmTool.pk=scope.row.id">GmTool</el-button>
+              <el-button size="small" type="warning" icon="el-icon-refresh-left" v-if="checkPermission(['WORLD_RESTART']) && typeActiveName == 'world'" @click="restrtApp.dialogRestartFormVisible=true;restrtApp.restart_world_id=scope.row.id">Restart</el-button>
+              <el-button size="small" type="danger" icon="el-icon-delete" v-if="checkPermission(['WORLD_DELETE'])" @click="deleteConfirm(scope.row)">Delete</el-button>
             </template>
           </el-table-column>
         </el-table>
         <div class="block" style="margin-left:40%">
           <el-pagination
             :hide-on-single-page=true
-            @current-change="paginationCurrentChange"
+            @current-change="paginationWorldCurrentChange"
             :current-page="pagination.world.currentPage"
             layout="prev, pager, next"
             :page-size=pagination.world.size
@@ -90,7 +91,7 @@
         </div>
     </el-row>
 
-    <!-- 实时日志dialog、 -->
+    <!-- reallog dialog、 -->
     <el-dialog title="RealLog" :visible.sync="realLog.dialogRealLogVisible" width="50%" :closeOnClickModal=false :closeOnPressEscape=false :showClose=false>
       <div class="dialogStyle" id="scroll">
         <span class="comment" > {{ realLog.dialog_data }} </span>
@@ -99,7 +100,7 @@
         <el-button type="primary" @click="destry()">确 定</el-button>
       </span>
     </el-dialog>
-    <!-- 创建dialog、 -->
+    <!-- create dialog、 -->
     <el-dialog title="Create" :visible.sync="createForm.dialogCreateFormVisible" width="40%" :closeOnClickModal=false :closeOnPressEscape=false :showClose=false>
       <el-form :model="createForm">
         <el-form-item label="cluster_name" label-width="110px">
@@ -108,13 +109,23 @@
         <el-form-item :label="typeActiveName+'_id'" label-width="110px">
           <el-input v-model="createForm.world_id" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="prod_name" label-width="110px" v-if="value=='firestrike-oregon-prod-2' && typeActiveName=='world'">
+        <el-form-item label="prod_name" label-width="110px" v-if="value=='firestrike-oregon-prod-2'">
           <el-input v-model="createForm.prod_name" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="image_tag" label-width="110px">
           <el-select style="width:220px;" filterable  v-model="createForm.image_tag" placeholder="请选择镜像版本">
             <el-option
               v-for="item in ImageList"
+              :key="item"
+              :label="item"
+              :value="item">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="copymap" label-width="110px" v-if="typeActiveName=='world'">
+          <el-select style="width:220px;" filterable  v-model="createForm.copymap" placeholder="选择副本服务器">
+            <el-option
+              v-for="item in createForm.copymapList"
               :key="item"
               :label="item"
               :value="item">
@@ -177,6 +188,21 @@
         <el-button type="primary" @click="batchUpdateSecurityGroup()">确认</el-button>
       </div>
     </el-dialog>
+
+    <!-- gotool dialog、 -->
+    <el-dialog title="GmTool Operation" :visible.sync="gmTool.Visible" width="40%" :closeOnClickModal=false>
+      <el-tabs type="card" v-model="gmTool.activeName" @tab-click="gmToolTabClick" style="margin-top:-30px;">
+        <el-tab-pane label="clearDeadNumber" name="clearDeadNumber" v-if="checkPermission(['WORLD_CLEARDEADNUMBER'])">
+          <el-button :loading=gmTool.isClearLoading type="primary" @click="clearDeadNumber()">清理死号</el-button>
+        </el-tab-pane>
+        <el-tab-pane label="autoClearDeadNumber" name="autoClearDeadNumber" v-if="checkPermission(['WORLD_AUTOCLEARDEADNUMBER'])">
+          <p>当前自动清理死号的接口状态是：<b style="color:red"> {{gmTool.auto_is_open_context}} </b></p> 
+          <el-button :loading=gmTool.isgetAutoLoading type="primary" @click="getAutoClearDeadNumber()">获取自动清理接口状态</el-button>
+          <el-button :loading=gmTool.isswitchAutoLoading type="primary" @click="switchAutoClearDeadNumber()">修改自动清理接口状态</el-button>
+        </el-tab-pane>
+      </el-tabs>
+    </el-dialog>
+
     <!-- result dialog、 -->
     <el-dialog title="Batch operation result" :visible.sync="batchResult.dialogResultVisible" width="40%" :closeOnClickModal=false>
       <el-tabs type="card" v-model="batchResult.activeName" @tab-click="batchResultTabClick" style="margin-top:-30px;">
@@ -213,7 +239,7 @@
           <div class="block" style="margin-left:40%">
             <el-pagination
               :hide-on-single-page=true
-              @current-change="paginationCurrentChange"
+              @current-change="paginationOperateCurrentChange"
               :current-page="pagination.operatehistory.currentPage"
               layout="prev, pager, next"
               :page-size=pagination.operatehistory.size
@@ -255,7 +281,7 @@
           <div class="block" style="margin-left:40%">
             <el-pagination
               :hide-on-single-page=true
-              @current-change="paginationCurrentChange"
+              @current-change="paginationOperateCurrentChange"
               :current-page="pagination.operatehistory.currentPage"
               layout="prev, pager, next"
               :page-size=pagination.operatehistory.size
@@ -297,7 +323,7 @@
           <div class="block" style="margin-left:40%">
             <el-pagination
               :hide-on-single-page=true
-              @current-change="paginationCurrentChange"
+              @current-change="paginationOperateCurrentChange"
               :current-page="pagination.operatehistory.currentPage"
               layout="prev, pager, next"
               :page-size=pagination.operatehistory.size
@@ -349,23 +375,23 @@
     <el-dialog title="CloudFront" :visible.sync="cloudFront.dialogVisible" width="40%" :closeOnClickModal=false>
       <el-tabs type="card" v-model="cloudFront.ActiveName" style="margin-top:-20px">
         <!-- serverlist -->
-        <el-tab-pane label="serverlist" name="serverlist" style="margin-top:10px;margin-left:10px">
+        <el-tab-pane label="serverlist" name="serverlist" style="margin-top:10px;margin-left:10px" v-if="checkPermission(['WORLD_SERVERLIST'])">
           <el-upload
           class="upload-demo"
-          ref="upload"
+          ref="supload"
           action=""
-          :http-request="httpRequest"
+          :http-request="serverListHttpRequest"
           :auto-upload="false">
             <el-button slot="trigger" type="primary">选取文件</el-button>
             <div slot="tip" class="el-upload__tip" style="font-size:16px;margin-top:10px;">只能上传文件，且不超过1mb</div>
           </el-upload>
           <div style="margin-top:30px;float:right;margin-right:30px">
-            <el-button type="primary" @click="online_serverlist.dialogEditonlineVisible=true;serverlist.dialogServerlistVisible=false">在线编辑</el-button>
+            <el-button type="primary" @click="online_serverlist.dialogEditonlineVisible=true;serverlist.dialogServerlistVisible=false" v-if="checkPermission(['WORLD_SERVERLISTONLINE'])">在线编辑</el-button>
             <el-button type="primary" :loading=serverlist.isServerlistLoading @click="submitUpload">Update</el-button>
           </div>
         </el-tab-pane>
         <!-- client serverlist -->
-        <el-tab-pane label="clientlist" name="clientlist">
+        <el-tab-pane label="clientlist" name="clientlist" v-if="checkPermission(['WORLD_CLIENTLIST'])">
           <el-form :model="clientlist" :rules="rules" style="margin-top:10px">
             <el-form-item label="clientversion" label-width="110px" prop="clientversion">
               <el-input v-model="clientlist.clientversion" autocomplete="off"></el-input>
@@ -373,7 +399,7 @@
           </el-form>
           <el-upload style="margin-left:10px"
           class="upload-demo"
-          ref="upload"
+          ref="cupload"
           action=""
           :http-request="clientListHttpRequest"
           :auto-upload="false">
@@ -385,7 +411,7 @@
           </div>
         </el-tab-pane>
         <!-- notice  -->
-        <el-tab-pane label="notice" name="notice">
+        <el-tab-pane label="notice" name="notice" v-if="checkPermission(['WORLD_NOTICE'])">
           <el-form :model="notice" :rules="rules">
             <el-form-item label="old_version" label-width="110px" prop="old_version">
               <el-input v-model="notice.old_version" autocomplete="off"></el-input>
@@ -423,7 +449,7 @@
 </template>
 
 <script>
-import { getCluster,getWorld,createWorld,getImages,updateWorld,deleteWorld,GetRealLog,DeleteRealLog,GetWorldStatus,getHistory,RestartApp,BackupRedis,UpdateSecurityGroup,batchUpdateSecurityGroup,UpdateServerList,UpdateClientList,updateNotice,operateHistory } from '@/api/cd/world.js'
+import { getCluster,getWorld,createWorld,getImages,updateWorld,deleteWorld,GetRealLog,DeleteRealLog,GetWorldStatus,getHistory,RestartApp,BackupRedis,UpdateSecurityGroup,batchUpdateSecurityGroup,UpdateServerList,UpdateClientList,updateNotice,operateHistory,clearDeadNumber,switchAutoClearDeadNumber,getAutoClearDeadNumber } from '@/api/cd/world.js'
 import checkPermission from '@/utils/permission'
 export default {
   filters: {
@@ -494,6 +520,17 @@ export default {
         },
       },
 
+      gmTool: {
+        Visible: false,
+        activeName: "clearDeadNumber",
+        pk: "",
+        auto_is_open: "",
+        auto_is_open_context: "获取错误",
+        isClearLoading: false,
+        isgetAutoLoading: false,
+        isswitchAutoLoading: false,
+      },
+
       cloudFront: {
         dialogVisible: false,
         ActiveName: "serverlist",
@@ -544,6 +581,8 @@ export default {
         label_name: "world_id",
         prod_name: "Planet #",
         dialogCreateFormVisible: false,
+        copymap: "",
+        copymapList: []
       },
       updateForm: {
         image_tag: "",
@@ -596,12 +635,20 @@ export default {
   },
   methods: {
     checkPermission(roles){
-      if ( this.value.indexOf("dev") == -1 ){
-        return checkPermission(roles)
-      }else{
-        roles.push("Development")
-        return checkPermission(roles)
+      if ( this.value.indexOf("dev") != -1 ){
+        roles.forEach((item, index, input) =>{
+          input[index] = "DEV_" + item 
+        })
+      }else if ( this.value.indexOf("qa") != -1 ){
+        roles.forEach((item, index, input) =>{
+          input[index] = "QA_" + item 
+        })
+      }else if ( this.value.indexOf("prod") != -1 ){
+        roles.forEach((item, index, input) =>{
+          input[index] = "PROD_" + item 
+        })
       }
+      return checkPermission(roles)
     },
 
     //get cluster prod/dev
@@ -617,6 +664,7 @@ export default {
     changeCluster(){
       this.getWorld()
       this.getImages()
+      this.clearData()
       this.batchOperate.multipleId = []
       this.batchOperate.multipleName = ""
       this.$refs.multipleTable.clearSelection();
@@ -625,6 +673,7 @@ export default {
     // switch world type world/global
     typehandleClick(tab, event) {
       this.getWorld()
+      this.clearData()
       this.batchOperate.multipleId = []
       this.batchOperate.multipleName = ""
       this.$refs.multipleTable.clearSelection();
@@ -635,6 +684,7 @@ export default {
       getWorld(this.value,this.typeActiveName)
         .then(response => {
             this.tableDataList = response.map(v =>{
+              // this.createForm.copymapList.push(v.name)
               this.$set(v,"healthy", "NoData")
               this.$set(v,"healthy_class", "el-icon-refresh-left healthy_stsyle")
               this.$set(v,"port_open_class", "el-icon-open healthy_stsyle" )
@@ -660,6 +710,18 @@ export default {
     },
      
     //create world
+    createHandle(){
+      this.createForm.copymapList=[]
+      this.createForm.dialogCreateFormVisible=true
+      getWorld(this.value,"copymap")
+        .then(response => {
+            response.map(v =>{
+              this.createForm.copymapList.push(v.name)
+            })
+        }, response => {
+            console.log(response);
+      }) 
+    },
     createWorld() {
       this.createForm.dialogCreateFormVisible=false
       this.realLog.dialogRealLogVisible = true
@@ -667,7 +729,7 @@ export default {
       if ( this.value=="firestrike-singapore-dev" ){
         this.createForm.prod_name=""
       }
-      createWorld({ cluster: this.value, world_id: this.createForm.world_id, image_tag: this.createForm.image_tag, prod_name: this.createForm.prod_name })
+      createWorld({ cluster: this.value, world_id: this.createForm.world_id, image_tag: this.createForm.image_tag, prod_name: this.createForm.prod_name, type: this.typeActiveName, copymap: this.createForm.copymap })
         // .then(response => {
         //   clearInterval(this.realLog.timer)
         //   this.getData()
@@ -721,7 +783,7 @@ export default {
     updateWorld() {
       this.updateForm.dialogUpdateFormVisible=false,
       this.batchResult.activeName = "update"
-      updateWorld( { world_list: this.batchOperate.multipleId, image_tag: this.updateForm.image_tag }) 
+      updateWorld( { world_list: this.batchOperate.multipleId, image_tag: this.updateForm.image_tag, type: this.typeActiveName, cluster: this.value }) 
         .then(response => {
           if (response.code == 500){
             this.$message({
@@ -743,7 +805,7 @@ export default {
     //operateHistory
     operateHistory(){
       this.batchResult.dialogResultVisible = true,
-      operateHistory(this.batchResult.activeName,this.value)
+      operateHistory(this.batchResult.activeName,this.value,this.typeActiveName)
         .then(response => {
           this.batchResult.data = response
         }, response => {
@@ -751,6 +813,7 @@ export default {
         });
     },
     batchResultTabClick(){
+      this.pagination.operatehistory.currentPage=1
       this.operateHistory()
     },
     showResultReason(scope){
@@ -777,7 +840,7 @@ export default {
         cancelButtonText: '取消',
         closeOnClickModal: false,
         inputValidator: (value) => {
-          if (row.name.split("firestrike-world")[1] == value){
+          if (row.name.split("firestrike-"+this.typeActiveName)[1] == value){
             return true
           }else{
             return "world_id不匹配"
@@ -850,7 +913,7 @@ export default {
         message: this.$createElement('i', { style: 'color: teal'}, '备份已经开始,请前往Result界面查看结果')
       });
       this.batchResult.activeName = "backup"
-      BackupRedis({ world_list: this.batchOperate.multipleId })
+      BackupRedis({ world_list: this.batchOperate.multipleId, cluster: this.value })
       .then(response => {
         console.log(response);
       }) 
@@ -884,13 +947,13 @@ export default {
     },
 
     /// update serverlist
-    httpRequest(param) {
+    serverListHttpRequest(param) {
     // 一般情况下是在这里创建FormData对象，但我们需要上传多个文件，为避免发送多次请求，因此在这里只进行文件的获取，param可以拿到文件上传的所有信息
       this.serverlist.fileList.push(param.file)
     },
     submitUpload() {
       var upData = new FormData()
-      this.$refs.upload.submit()
+      this.$refs.supload.submit()
       this.serverlist.fileList.forEach(function (file) {
         const size = file.size / 1024 <= 500
         if (!size) {  //不清楚为什么不能直接使用this.$message，可能因为在forEach里面吧
@@ -906,9 +969,10 @@ export default {
         });
         return false
       }
+      console.log(upData.get("file"))
       if (!upData.get("file")){
         this.$message({
-          type: 'error',                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+          type: 'warning',                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
           message: '未选择文件,请选择文件后在更新'
         });
         return false
@@ -947,7 +1011,7 @@ export default {
     },
     clientSubmitUpload() {
       var upData = new FormData()
-      this.$refs.upload.submit()
+      this.$refs.cupload.submit()
       this.clientlist.fileList.forEach(function (file) {
         const size = file.size / 1024 <= 500
         if (!size) {  //不清楚为什么不能直接使用this.$message，可能因为在forEach里面吧
@@ -965,7 +1029,7 @@ export default {
       }
       if (!upData.get("file")){
         this.$message({
-          type: 'error',                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+          type: 'warning',                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
           message: '未选择文件,请选择文件后在更新'
         });
         return false
@@ -996,6 +1060,78 @@ export default {
       // this.$refs.upload.submit();
     },
 
+    //gmtool
+    clearDeadNumber(){
+      this.gmTool.isClearLoading = true;
+      clearDeadNumber(this.gmTool.pk)
+      .then(response => {
+        if (response.res == 500){
+          this.$message({
+            type: 'error',
+            message: response.msg
+          });
+        }else{
+          this.$message({
+            type: 'success',
+            message: '清除已经开始，请等待'
+          });
+        }
+        this.gmTool.isClearLoading = false;
+        console.log(response);
+      }, response => {
+        this.gmTool.isClearLoading = false;
+        console.log(response);
+      })
+    },
+    getAutoClearDeadNumber(){
+      this.gmTool.isgetAutoLoading = true;
+      getAutoClearDeadNumber(this.gmTool.pk)
+      .then(response => {
+        if (response.res == 500){
+          this.$message({
+            type: 'error',
+            message: response.msg
+          });
+        }else{
+          this.gmTool.auto_is_open = response.msg
+          this.gmTool.auto_is_open_context = (this.gmTool.auto_is_open == 1) ? "开启的" : "关闭的"
+        }
+        this.gmTool.isgetAutoLoading = false;
+        console.log(response);
+      }, response => {
+        this.gmTool.isgetAutoLoading = false;
+        console.log(response);
+      })
+    },
+    switchAutoClearDeadNumber(){
+      this.gmTool.isswitchAutoLoading = true;
+      switchAutoClearDeadNumber(this.gmTool.pk,{"is_open": this.gmTool.auto_is_open})
+      .then(response => {
+        if (response.res == 500){
+          this.$message({
+            type: 'error',
+            message: response.msg
+          });
+        }else{
+          this.$message({
+            type: 'success',
+            message: '更新成功'
+          });
+          this.gmTool.auto_is_open = (this.gmTool.auto_is_open == 1) ? 0 : 1
+          this.gmTool.auto_is_open_context = (this.gmTool.auto_is_open == 1) ? "开启的" : "关闭的"
+        }
+        this.gmTool.isswitchAutoLoading = false;
+        console.log(response);
+      }, response => {
+        this.gmTool.isswitchAutoLoading = false;
+        console.log(response);
+      })
+    },
+    gmToolTabClick(tab){
+      if(tab.paneName == "autoClearDeadNumber"){
+        this.getAutoClearDeadNumber()
+      }
+    },
 
     //update notice
     updateNotice(){
@@ -1054,7 +1190,7 @@ export default {
     Update_security_group(row,instance,done){
       UpdateSecurityGroup(row.id)
       .then(response => {
-          if (response.status == 500){
+          if (response.res == 500){
             this.$message({
               type: 'error',
               message: response.message
@@ -1086,7 +1222,7 @@ export default {
     },
     batchUpdateSecurityGroup(){
       this.batchResult.activeName = "securityGroup"
-      batchUpdateSecurityGroup({"world_list": this.batchOperate.multipleId})
+      batchUpdateSecurityGroup({"world_list": this.batchOperate.multipleId, "cluster": this.value})
       .then(response => {
           this.$notify({
             title: '更新开始', 
@@ -1149,10 +1285,23 @@ export default {
       this.batchOperate.multipleName = this.batchOperate.multipleName.toString()
     },
 
+    // clearData
+    clearData(){
+      this.createForm.world_id=""
+      this.createForm.image_tag=""
+      this.createForm.prod_name="Planet #"
+      this.createForm.copymap=""
+      this.updateForm.image_tag=""
+    },
+
     //pagination
-    paginationCurrentChange(val) {
+    paginationWorldCurrentChange(val) {
       // console.log(`当前页: ${val}`);
       this.pagination.world.currentPage = val
+    },
+    paginationOperateCurrentChange(val) {
+      // console.log(`当前页: ${val}`);
+      this.pagination.operatehistory.currentPage = val
     },
     //分页时要设置选择会有一个行号，这里需要一个RowKey的属性
     getRowKeys(row) {

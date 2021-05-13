@@ -7,7 +7,10 @@
       <a :href='file_url' target="_blank">here</a>
       to download the serverlist file in aws
     </aside>
+    <!-- <p style="float:left;margin-left:15px">所有修改和添加操作只保存在网页中，只有<b style="color:red">提交后</b>才会更新到aws上 </p> -->
+    <p style="float:left;margin-left:15px">All modifications and additions are only saved in the web page, and will be updated to aws only after <b style="color:red">commit</b></p>
     <el-row style="float:right;margin:5px 25px 10px 0;z-index:1000">
+      <el-button type="primary" size="medium" icon="el-icon-finished" style="height:40px;" @click="commitConfirm()">Commit</el-button>
       <el-button size="medium" type="primary" icon="el-icon-copy-document" style="height:40px;" @click="dialogCreateFormVisible=true">New Line</el-button>
     </el-row>
     <el-row>
@@ -191,6 +194,7 @@ export default {
           }
           this.tableloading = false
           console.log(response);
+          console.log(this.serverlist)
       }, response => {
           console.log(response);
       });
@@ -200,36 +204,45 @@ export default {
       this.dialogEditFormVisible = true
     },
     updateServerlistonline() {
-      this.isUpdateLoading = true
-      updateServerlistonline({"host_path":this.host_path,"cluster_name":this.$route.query.cluster_name,"serverlist":this.dialogEditRow})
-        .then(response => {
-          this.dialogEditFormVisible = false
-          this.isUpdateLoading = false
-          this.$message({
-            type: 'success',
-            message: '更新成功'
-          });
-          console.log(response);
-      }, response => {
-          console.log(response);
-      });
+      this.dialogEditFormVisible = false
     },
     addServerlistonline(){
-      this.isCreateLoading = true
-      addServerlistonline({"host_path":this.host_path,"create_form": this.createForm,"cluster_name":this.$route.query.cluster_name})
-        .then(response => {
-          this.dialogCreateFormVisible = false
-          this.isCreateLoading = false
-          this.$message({
-            type: 'success',
-            message: '新增成功'
-          });
-          console.log(response);
-      }, response => {
-          console.log(response);
-      });
-      this.getServerlistonline()
+      this.serverlist.push(this.createForm)
+      this.dialogCreateFormVisible = false
     },
+
+    commitConfirm() {
+      this.$confirm('此操作将提交到aws, 是否继续?', '提示', {
+        showCancelButton: true,
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        beforeClose: (action, instance, done) => {
+          if (action === 'confirm') {    
+            instance.confirmButtonLoading = true;
+            instance.confirmButtonText = '执行中...';
+            updateServerlistonline({"host_path":this.host_path,"cluster":this.$route.query.cluster_name,"serverlist":this.serverlist})
+            .then(response => {
+              instance.confirmButtonLoading = false;
+              done()
+              this.$message({
+                type: 'success',
+                message: '提交成功'
+              });
+            }, response => {
+              instance.confirmButtonLoading = false;
+              console.log(response);
+            });
+          } else {
+            this.$message({
+            type: 'info',
+            message: '已取消提交'
+            });
+            done();
+          }
+        }
+      })
+    },
+
     dialogDestry(str){
       this.$message({
         type: 'info',

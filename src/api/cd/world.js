@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getCluster() {
   return request({
-    url: '/api/GetCluster/',
+    url: '/api/cluster/',
     method: 'get',
   })
 }
@@ -138,14 +138,14 @@ export function getServerlistonline(cluster_name,version) {
 }
 export function updateServerlistonline(data) {
   return request({
-    url: '/api/world/updateserverlistonline/',
-    method: 'post',
+    url: '/api/world/serverlistonline/',
+    method: 'put',
     data
   })
 } 
 export function addServerlistonline(data) {
   return request({
-    url: '/api/world/addserverlistonline/',
+    url: '/api/world/serverlistonline/',
     method: 'post',
     data
   })
@@ -157,10 +157,31 @@ export function updateNotice(data) {
     data
   })
 } 
-export function operateHistory(type,cluster) {
+export function operateHistory(type,cluster,worldType) {
   return request({
     url: '/api/world/operateHistory/',
     method: 'get',
-    params: { type: type, cluster:cluster }
+    params: { type: type, cluster:cluster, worldType:worldType }
+  })
+} 
+
+
+export function getAutoClearDeadNumber(pk) {
+  return request({
+    url: '/api/world/'+pk+'/autoClearDeadNumber/',
+    method: 'get',
+  })
+} 
+export function switchAutoClearDeadNumber(pk,data) {
+  return request({
+    url: '/api/world/'+pk+'/autoClearDeadNumber/',
+    method: 'post',
+    data
+  })
+} 
+export function clearDeadNumber(pk) {
+  return request({
+    url: '/api/world/'+pk+'/clearDeadNumber/',
+    method: 'post',
   })
 } 

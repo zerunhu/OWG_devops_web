@@ -1,13 +1,13 @@
 import request from '@/utils/request'
 export function GetEcrImages() {
   return request({
-    url: '/api/GetEcrImages/',
+    url: '/api/app/',
     method: 'get',
   })
 }
 export function GetEcrTags(image, cluster) {
     return request({
-      url: '/api/GetEcrTags/',
+      url: '/api/ci/image/',
       method: 'get',
       params: { app: image, cluster: cluster }
     })

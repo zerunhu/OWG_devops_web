@@ -1,11 +1,11 @@
 <template>
   <div class="app-container">
-    <el-button type="primary" @click="dialogVisible = true; getAllusers()">New User</el-button>
+    <el-button type="primary" @click="dialogVisible = true; getAllusers()" v-if="checkPermission(['GROUP_USER_CREATE'])">New User</el-button>
 
     <el-table :data="userList" style="width: 100%;margin-top:30px;" border>
       <el-table-column align="center" label="User name" width="220">
         <template slot-scope="scope">
-          {{ scope.row.username }}
+          {{ scope.row.name }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="User email" width="220">
@@ -13,14 +13,14 @@
           {{ scope.row.email }}
         </template>
       </el-table-column>
-      <el-table-column align="header-center" label="User last_name">
+      <el-table-column align="header-center" label="User phone">
         <template slot-scope="scope">
-          {{ scope.row.last_name }}
+          {{ scope.row.phone }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="Operations">
         <template slot-scope="scope">
-          <el-button type="danger" size="small" @click="deleteUser(scope.row)">Delete</el-button>
+          <el-button type="danger" size="small" @click="deleteUser(scope.row)" v-if="checkPermission(['GROUPS_DELETE'])">Delete</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -35,9 +35,9 @@
           <el-select style="width:220px;" filterable  v-model="user.name" placeholder="请选择用户">
             <el-option
               v-for="item in users"
-              :key="item"
-              :label="item.username"
-              :value="item.username">
+              :key="item.id"
+              :label="item.name"
+              :value="item.name">
             </el-option>
           </el-select>
         </el-form-item>
@@ -52,8 +52,8 @@
 </template>
 
 <script>
-import { getUser, deleteUser, addUser, getAllusers } from '@/api/permission/role'
-
+import { getUser, deleteUser, addUser, getAllusers } from '@/api/user/group'
+import checkPermission from '@/utils/permission'
 export default {
   data() {
     return {
@@ -63,6 +63,7 @@ export default {
       Role_id: this.$route.params.id,
       user: {
         name: "",
+        id: "",
       },
     }
   },
@@ -70,10 +71,14 @@ export default {
     this.getUser()
   },
   methods: {
+    checkPermission(roles){
+        return checkPermission(roles)
+    },
     getAllusers(){
       getAllusers()
         .then(response => {
           this.users = response
+          console.log(this.users)
       }, response => {
         console.log(response);
       });
@@ -87,7 +92,7 @@ export default {
       });
     },
     addUser() {
-      addUser(this.Role_id,{"name":this.user.name})
+      addUser({"user_name":this.user.name,"group_id":this.Role_id})
         .then(response => {
           this.getUser()
           this.dialogVisible = false
@@ -102,12 +107,12 @@ export default {
     },
 
     deleteUser(row) {
-        this.$confirm('此操作将永久删除该User, 是否继续?', '提示', {
+        this.$confirm('此操作将把该用户从这个组移除, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          deleteUser(this.Role_id,{"name": row.username})
+          deleteUser({"user_name":row.name,"group_id":this.Role_id})
           .then(response => {
             this.getUser()
             this.$message({
@@ -119,6 +124,7 @@ export default {
             console.log(response);
           });
         }).catch(() => {
+          console.log(555)
           this.$message({
             type: 'info',
             message: '已取消删除'

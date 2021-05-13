@@ -20,7 +20,7 @@ export function deleteContainer(id) {
 }
 export function buildImage(id,data) {
   return request({
-    url: '/api/cicontainers/'+id+'/ci_build/',
+    url: '/api/cicontainers/'+id+'/build/',
     method: 'post',
     data
   })
@@ -33,7 +33,7 @@ export function getEcraddr() {
 }
 export function pushImage(id) {
   return request({
-    url: '/api/cicontainers/'+id+'/ci_push/',
+    url: '/api/cicontainers/'+id+'/push/',
     method: 'post',
   })
 }

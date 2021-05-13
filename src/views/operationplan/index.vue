@@ -1,14 +1,7 @@
 <template>
   <div class="app-container" >
-    <!-- <aside>
-      <strong>ServerList Name: </strong>{{ file_name }}
-      <br>
-      You can click
-      <a :href='file_url' target="_blank">here</a>
-      to download the serverlist file in aws
-    </aside> -->
     <el-row style="float:right;margin:5px 25px 10px 0;z-index:1000">
-      <el-button size="medium" type="primary" icon="el-icon-copy-document" v-if="tableloading!=true && checkPermission(['admin','Operation'])" style="height:40px;" @click="adddialog()">New Plan</el-button>
+      <el-button size="medium" type="primary" icon="el-icon-copy-document" v-if="tableloading!=true && checkPermission(['OPERATIONPLAN_CREATE'])" style="height:40px;" @click="adddialog()">New Plan</el-button>
     </el-row>
     <el-tabs style="margin-top: 30px" type="card" v-if="tableloading!=true" v-model="paneActiveName" @tab-click="handleClick">
       <el-tab-pane label="更新计划" name="update"></el-tab-pane>
@@ -45,13 +38,13 @@
           </el-table-column>
           <el-table-column label="操作"  align="center" min-width="200px">
             <template slot-scope="scope">
-                <el-button type="primary" size="small" v-if="checkPermission(['admin','Operation'])" :disabled="scope.row.result | completebool" icon="el-icon-success" @click="completeConfirm(scope.row.id)">
+                <el-button type="primary" size="small" v-if="checkPermission(['OPERATIONPLAN_COMPLETE'])" :disabled="scope.row.result | completebool" icon="el-icon-success" @click="completeConfirm(scope.row.id)">
                   Complete
                 </el-button>
-                <el-button type="primary" size="small" v-if="checkPermission(['admin','Operation'])" :disabled="scope.row.result | completebool" icon="el-icon-edit" @click="updateBefore(scope.row)">
+                <el-button type="primary" size="small" v-if="checkPermission(['OPERATIONPLAN_UPDATE'])" :disabled="scope.row.result | completebool" icon="el-icon-edit" @click="updateBefore(scope.row)">
                   Edit
                 </el-button>
-                <el-button type="danger" size="small" v-if="checkPermission(['admin','Operation'])" icon="el-icon-delete" @click="deleteConfirm(scope.row.id)">
+                <el-button type="danger" size="small" v-if="checkPermission(['OPERATIONPLAN_DELETE'])" icon="el-icon-delete" @click="deleteConfirm(scope.row.id)">
                   Delete
                 </el-button>
             </template>

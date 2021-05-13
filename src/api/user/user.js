@@ -9,7 +9,7 @@ export function login(data) {
 
 export function getInfo(token) {
   return request({
-    url: '/api/users/info/',
+    url: '/api/userinfo/',
     method: 'get',
     params: { token: token }
   })
@@ -28,10 +28,11 @@ export function getUser() {
     method: 'get',
   })
 }
-export function deleteUser(pk) {
+export function deleteUser(data) {
   return request({
-    url: '/api/users/'+pk+'/',
+    url: '/api/users/',
     method: 'delete',
+    data
   })
 }
 export function addUser(data) {
@@ -43,7 +44,7 @@ export function addUser(data) {
 }
 export function getGroups() {
   return request({
-    url: '/api/role/',
+    url: '/api/groups/',
     method: 'get',
   })
 }

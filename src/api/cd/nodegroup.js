@@ -8,7 +8,7 @@ export function GetNodegroup(cluster) {
 }
 export function getCluster() {
   return request({
-    url: '/api/GetCluster/',
+    url: '/api/cluster/',
     method: 'get',
   })
 }
