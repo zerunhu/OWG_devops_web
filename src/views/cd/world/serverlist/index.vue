@@ -100,13 +100,13 @@
           <el-input v-model="createForm.name" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="Port" label-width="110px">
-          <el-input v-model="createForm.port" autocomplete="off" :disabled="true"></el-input>
+          <el-input v-model="createForm.port" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="Ip" label-width="110px">
-          <el-input v-model="createForm.ip" autocomplete="off" :disabled="true"></el-input>
+          <el-input v-model="createForm.ip" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="Sort" label-width="110px">
-          <el-input v-model="createForm.sort" autocomplete="off"></el-input>
+          <el-input v-model="createForm.sort" autocomplete="off" @change="valueIntSort"></el-input>
         </el-form-item>
         <el-form-item label="Realstate" label-width="110px">
           <el-input v-model="createForm.realstate" autocomplete="off" :disabled="true"></el-input>
@@ -168,7 +168,7 @@ export default {
         state: "",
         name: "Planet #",
         ip: "34.216.44.228",
-        port: "",
+        port: 10009,
         property: "",
         realstate: 1,
       },
@@ -181,20 +181,19 @@ export default {
     getServerlistonline() {
       getServerlistonline(this.$route.query.cluster_name,this.$route.query.serverlist_version)
         .then(response => {
-          if(response.status != 500){
+          // if(response.status != 500){
             this.serverlist = response.serverlist
             this.host_path = response.file
             this.file_name = this.host_path.split("/")[3]
             this.file_url = "https://d3uh30nzjjnhcl.cloudfront.net/"+this.file_name
-          }else{
-            this.$message({
-              type: 'error',
-              message: response.message
-            });
-          }
+          // }else{
+          //   this.$message({
+          //     type: 'error',
+          //     message: response.message
+          //   });
+          // }
           this.tableloading = false
           console.log(response);
-          console.log(this.serverlist)
       }, response => {
           console.log(response);
       });
@@ -208,6 +207,7 @@ export default {
     },
     addServerlistonline(){
       this.serverlist.push(this.createForm)
+      console.log(this.createForm)
       this.dialogCreateFormVisible = false
     },
 
@@ -250,7 +250,11 @@ export default {
       });
     },
     createIdchange(){
-      this.createForm.port = parseInt(this.createForm.id) + 30000
+      // this.createForm.port = parseInt(this.createForm.id) + 30000
+      this.createForm.id =  parseInt(this.createForm.id)
+    },
+    valueIntSort(){
+      this.createForm.sort =  parseInt(this.createForm.sort)
     },
   }
 }

@@ -280,8 +280,8 @@ export const asyncRouterMap = [
     { 
       path: 'world/serverlist',
       component: () => import('@/views/cd/world/serverlist'),
-      name: 'WORLD_SERVERLIST',
-      meta: { roles: 'WORLD_SERVERLIST', title: "ServerList"},
+      name: 'PROD_WORLD_SERVERLISTONLINE',
+      meta: { roles: 'PROD_WORLD_SERVERLISTONLINE', title: "ServerList"},
       hidden: true,
     },
     ]

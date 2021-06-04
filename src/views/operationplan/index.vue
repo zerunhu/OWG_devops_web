@@ -23,8 +23,11 @@
           <!-- <el-table-column label="type" align="center" min-width="80px">
             <template slot-scope="scope"> {{ scope.row.type }} </template>
           </el-table-column> -->
-          <el-table-column label="time" align="center" min-width="120px">
-            <template slot-scope="scope"> {{ scope.row.time }} </template>
+          <el-table-column label="StartTime" align="center" min-width="120px">
+            <template slot-scope="scope"> {{ scope.row.start_time }} </template>
+          </el-table-column>
+          <el-table-column label="StopTime" align="center" min-width="120px">
+            <template slot-scope="scope"> {{ scope.row.stop_time }} </template>
           </el-table-column>
           <el-table-column label="result" align="center" min-width="80px">
             <template slot-scope="scope"> 
@@ -94,11 +97,18 @@
         <el-form-item label="Type" label-width="110px">
           <el-input v-model="createForm.type" :disabled="true"></el-input>
         </el-form-item>
-        <el-form-item label="Time" label-width="110px">
+        <el-form-item label="StartTime" label-width="110px">
           <el-date-picker
-            v-model="createForm.time"
+            v-model="createForm.start_time"
             type="datetime"
-            placeholder="选择日期时间">
+            placeholder="选择开始时间">
+            </el-date-picker>
+        </el-form-item>
+        <el-form-item label="StopTime" label-width="110px">
+          <el-date-picker
+            v-model="createForm.stop_time"
+            type="datetime"
+            placeholder="选择结束时间">
             </el-date-picker>
         </el-form-item>
         <el-form-item label="Remark" label-width="110px">
@@ -142,9 +152,16 @@
         <el-form-item label="Type" label-width="110px">
           <el-input v-model="updateForm.type" :disabled="true"></el-input>
         </el-form-item>
-        <el-form-item label="Time" label-width="110px">
+        <el-form-item label="StartTime" label-width="110px">
           <el-date-picker
-            v-model="updateForm.time"
+            v-model="updateForm.start_time"
+            type="datetime"
+            placeholder="选择日期时间">
+            </el-date-picker>
+        </el-form-item>
+        <el-form-item label="StopTime" label-width="110px">
+          <el-date-picker
+            v-model="updateForm.stop_time"
             type="datetime"
             placeholder="选择日期时间">
             </el-date-picker>
@@ -200,7 +217,8 @@ export default {
         world: [],
         image: "",
         type: "update",
-        time: "",
+        start_time: "",
+        stop_time: "",
         remark: "",
         result: "",
       },
@@ -211,7 +229,8 @@ export default {
         world: [],
         image: "",
         type: "update",
-        time: "",
+        start_time: "",
+        stop_time: "",
         remark: "",
         result: "",
       },
@@ -308,7 +327,8 @@ export default {
         this.updateForm.world = row.world.split(",")
         this.updateForm.image= row.image
         this.updateForm.type= row.type
-        this.updateForm.time= row.time
+        this.updateForm.start_time= row.start_time
+        this.updateForm.stop_time= row.stop_time
         this.updateForm.remark= row.remark
         this.updateForm.result= row.result
     },

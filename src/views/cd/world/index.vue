@@ -35,22 +35,25 @@
           ref="multipleTable"
           @selection-change="handleSelectionChange">
           <el-table-column type="selection" fixed align="center" min-width="90" :reserve-selection="true"></el-table-column>
-          <el-table-column label="name" fixed align="center" min-width="160px">
+          <el-table-column label="name" fixed align="center" min-width="130px">
             <template slot-scope="scope"> {{ scope.row.name  }} </template>
           </el-table-column>
-          <el-table-column label="create_time" align="center" min-width="200px" sortable prop="create_time"> 
+          <el-table-column label="create_time" align="center" min-width="150px" sortable prop="create_time"> 
             <template slot-scope="scope"> {{ scope.row.create_time.split(".")[0] }}</template>
           </el-table-column>
-          <el-table-column label="update_time" align="center" min-width="200px">
+          <el-table-column label="update_time" align="center" min-width="150px">
             <template slot-scope="scope"> {{ scope.row.update_time.split(".")[0] }} </template>
           </el-table-column>
-          <el-table-column label="image_tag" align="center" min-width="140px">
+          <el-table-column label="image_tag" align="center" min-width="100px">
             <template slot-scope="scope"> {{ scope.row.image_tag }} </template>
           </el-table-column>
-          <el-table-column label="prod_name" align="center" min-width="140px" >
+          <el-table-column label="prod_name" align="center" min-width="100px" >
             <template slot-scope="scope"> {{ scope.row.prod_name }} </template>
           </el-table-column>
-          <el-table-column label="healthy_check" align="center" min-width="150px">
+          <el-table-column label="copymap" align="center" min-width="170px" v-if="this.typeActiveName == 'world'"> 
+            <template slot-scope="scope"> {{ scope.row.copymap }}</template>
+          </el-table-column>
+          <el-table-column label="healthy_check" align="center" min-width="120px">
             <template slot-scope="scope">
               <el-tag :type="scope.row.healthy === 'Healthy' ? 'success' : 'info'">
                 {{ scope.row.healthy }}
@@ -60,7 +63,7 @@
               </el-tooltip>
             </template>
           </el-table-column>
-          <el-table-column label="port_open" align="center" min-width="150px" v-if="checkPermission(['WORLD_SECURITYGROUP']) && value=='firestrike-oregon-prod-2' && typeActiveName=='world'">
+          <el-table-column label="port_open" align="center" min-width="120px" v-if="checkPermission(['WORLD_SECURITYGROUP']) && value=='firestrike-oregon-prod-2' && typeActiveName=='world'">
             <template slot-scope="scope">
               <el-tag :type="scope.row.port_open === true ? 'success' : 'info'">
                 {{ scope.row.port_open === true ? 'open' : 'close' }}
@@ -70,7 +73,7 @@
               </el-tooltip>
             </template>
           </el-table-column>
-          <el-table-column label="操作" align="center" min-width="450px">
+          <el-table-column label="操作" align="center" min-width="360px">
             <template slot-scope="scope">
               <el-button size="small" type="primary" icon="el-icon-chat-line-square" @click="getHistory(scope.row.id)" v-if="checkPermission(['WORLD_HISTORY'])">History</el-button>
               <el-button size="small" type="primary" icon="el-icon-s-tools" v-if="checkPermission(['WORLD_CLEARDEADNUMBER','WORLD_AUTOCLEARDEADNUMBER']) && value=='firestrike-oregon-prod-2' && typeActiveName == 'world'" @click="gmTool.Visible=true;gmTool.pk=scope.row.id">GmTool</el-button>
@@ -640,7 +643,7 @@ export default {
           input[index] = "DEV_" + item 
         })
       }else if ( this.value.indexOf("qa") != -1 ){
-        roles.forEach((item, index, input) =>{
+        roles.forEach((item, index, input) =>{ 
           input[index] = "QA_" + item 
         })
       }else if ( this.value.indexOf("prod") != -1 ){
@@ -739,7 +742,7 @@ export default {
         //   console.log(response);
         // });
         .then(response => {
-          if (response.code == 500){
+          if (response.status == 500){
             this.realLog.dialogRealLogVisible = false,
             this.$message({
               type: 'warning',
@@ -785,7 +788,7 @@ export default {
       this.batchResult.activeName = "update"
       updateWorld( { world_list: this.batchOperate.multipleId, image_tag: this.updateForm.image_tag, type: this.typeActiveName, cluster: this.value }) 
         .then(response => {
-          if (response.code == 500){
+          if (response.status == 500){
             this.$message({
               type: 'warning',
               duration: 8000,
@@ -954,6 +957,13 @@ export default {
     submitUpload() {
       var upData = new FormData()
       this.$refs.supload.submit()
+      if (this.serverlist.fileList.length>1){
+        this.$message({
+          type: 'warning',                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+          message: '选择文件数量大于一，请删除多余选择'
+        });
+        return false
+      }
       this.serverlist.fileList.forEach(function (file) {
         const size = file.size / 1024 <= 500
         if (!size) {  //不清楚为什么不能直接使用this.$message，可能因为在forEach里面吧
@@ -969,7 +979,7 @@ export default {
         });
         return false
       }
-      console.log(upData.get("file"))
+      // console.log(upData.get("file"))
       if (!upData.get("file")){
         this.$message({
           type: 'warning',                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
@@ -982,23 +992,19 @@ export default {
       //执行后台函数
       UpdateServerList(upData)
         .then(response => {
-          if (response.status == 500){
-            this.$message({
-              type: 'error',
-              message: response.message
-            });
-          }else{
-            this.$message({
-              message: '更新成功',
-              type: 'success'
-            })
-          }
+          this.$message({
+            message: '更新成功',
+            type: 'success'
+          })
           this.serverlist.isServerlistLoading=false
           this.serverlist.dialogServerlistVisible=false
-          console.log(response);
+          this.serverlist.fileList=[]
+          this.$refs.supload.clearFiles()
       }, response => {
         this.serverlist.isServerlistLoading=false
         this.serverlist.dialogServerlistVisible=false
+        this.serverlist.fileList=[]
+        this.$refs.supload.clearFiles()
         console.log(response);
       });
       // this.$refs.upload.submit();
@@ -1014,7 +1020,7 @@ export default {
       this.$refs.cupload.submit()
       this.clientlist.fileList.forEach(function (file) {
         const size = file.size / 1024 <= 500
-        if (!size) {  //不清楚为什么不能直接使用this.$message，可能因为在forEach里面吧
+        if (!size) {  //不清楚为什么不能直接使用this.$message，可能因为在forEach里面吧,所以在底下提示
           upData.append('error','文件大小不能超过500kb')
           return false
         }
@@ -1040,21 +1046,17 @@ export default {
       //执行后台函数
       UpdateClientList(upData)
         .then(response => {
-          if (response.status == 500){
-            this.$message({
-              type: 'error',
-              message: response.message
-            });
-          }else{
-            this.$message({
-              message: '更新成功',
-              type: 'success'
-            })
-          }
+          this.$message({
+            message: '更新成功',
+            type: 'success'
+          })
           this.clientlist.isLoading=false
-          console.log(response);
+          this.$refs.cupload.clearFiles()
+          this.clientlist.fileList=[]
       }, response => {
         this.clientlist.isLoading=false
+        this.clientlist.fileList=[]
+        this.$refs.cupload.clearFiles()
         console.log(response);
       });
       // this.$refs.upload.submit();
@@ -1141,7 +1143,7 @@ export default {
         if (response.status == 500){
           this.$message({
             type: 'error',
-            message: response.message
+            message: response.msg
           });
         }else{
           this.$message({
@@ -1190,10 +1192,10 @@ export default {
     Update_security_group(row,instance,done){
       UpdateSecurityGroup(row.id)
       .then(response => {
-          if (response.res == 500){
+          if (response.status == 500){
             this.$message({
               type: 'error',
-              message: response.message
+              message: response.msg
             });
           }else{
             this.$set(row,"port_open",!row.port_open)

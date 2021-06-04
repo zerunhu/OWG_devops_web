@@ -176,7 +176,7 @@ export default {
             // this.scrollDown()
             this.$notify({
               title: 'BUILD SUCCESS',
-              message: response.message,
+              message: response.msg,
               duration: 30000,
               type: 'success'
             });
@@ -189,7 +189,7 @@ export default {
           console.log(response)
           this.$notify({
             title: 'BUILD FAILED',
-            message: response.message,
+            message: response.msg,
             duration: 30000,
             type: 'error'
           });
@@ -208,7 +208,7 @@ export default {
             this.$set(row,"pushloading",false)
             this.$notify({
               title: 'PUSH SUCCESS',
-              message: response.message,
+              message: response.msg,
               duration: 30000,
               type: 'success'
             });
@@ -220,7 +220,7 @@ export default {
             // this.dialogTitle = "推送失败"
             this.$notify({
               title: 'PUSH FAILED',
-              message: response.message,
+              message: response.msg,
               duration: 30000,
               type: 'error'
             });
@@ -252,7 +252,7 @@ export default {
             this.dialogbranchVisible = false
             this.$notify({
               title: 'CREATE SUCCESS',
-              message: response.message,
+              message: response.msg,
               duration: 30000,
               type: 'success'
             });
@@ -272,7 +272,7 @@ export default {
           // this.scrollDown()
           this.$notify({
             title: 'CREATE FAILED',
-            message: response.message,
+            message: response.msg,
             duration: 30000,
             type: 'error'
           });

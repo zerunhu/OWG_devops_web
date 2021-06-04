@@ -62,6 +62,12 @@ service.interceptors.response.use(
         type: 'error',
         duration: 5 * 1000
       })
+    }else if (error.message.indexOf("504") != -1){
+      Message({
+        message: "请求超时",
+        type: 'error',
+        duration: 5 * 1000
+      })
     }else{
       Message({
         message: "服务器内部错误，请联系管理员",
