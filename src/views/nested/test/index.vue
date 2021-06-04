@@ -1,85 +1,34 @@
 <template>
-  <div>
-    <el-card class="box-card m-t-10" shadow="hover">
-      <div slot="header">
-        <el-row type="flex" justify="space-between">
-            <el-col :span="12">
-                <el-button size="mini">批量删除</el-button>
-            </el-col>
-        </el-row>
-      </div>
-      <el-table border fit 
-        :data="tableData"
-        tooltip-effect="dark"
-        style="width: 100%"
-        @selection-change="handleSelectionChange">
-        <el-table-column
-          type="selection"
-          width="55">
-        </el-table-column>
-        <el-table-column
-          label="日期"
-          width="120">
-          <template slot-scope="scope">{{ scope.row.date }}</template>
-        </el-table-column>
-        <el-table-column
-          prop="name"
-          label="姓名"
-          width="120">
-        </el-table-column>
-        <el-table-column
-          prop="address"
-          label="地址">
-        </el-table-column>
-      </el-table>
-    </el-card>
+  <div class="block">
+    <span class="demonstration">默认</span>
+    <el-date-picker
+      v-model="value1"
+      type="datetime"
+      placeholder="选择日期时间">
+    </el-date-picker>
+    <el-button type="primary" @click="updateWorld()">确认</el-button>
   </div>
-  
 
 </template>
 
 <script>
+import { test } from '@/api/test'
   export default {
     data() {
       return {
-        tableData: [{
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }, {
-          date: '2016-05-02',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }, {
-          date: '2016-05-04',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }, {
-          date: '2016-05-01',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }, {
-          date: '2016-05-08',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }, {
-          date: '2016-05-06',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }, {
-          date: '2016-05-07',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }],
-        multipleSelection: []
+        value1: "2021-06-04T09:00:00.000Z"
       }
     },
 
     methods: {
-      handleSelectionChange(val) {
-        this.multipleSelection = val;
-        console.log(this.multipleSelection[1].address)
-      }
+      updateWorld() {
+      test( { time: new Date( this.value1 ).getTime()/1000 }) 
+        .then(response => {
+          console.log(response);
+      }, response => {
+          console.log(response);
+      }) 
+    },
     }
   }
 </script>

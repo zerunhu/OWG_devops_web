@@ -25,4 +25,11 @@ export function update_serverList(data) {
     return instance.post('/api/test',data)
 }
 
+export function test(data) {
+  return request({
+    url: '/api/test',
+    method: 'post',
+    data
+  })
+}
 

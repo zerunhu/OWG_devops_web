@@ -84,10 +84,17 @@
             </el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="overTime" label-width="110px">
+          <el-date-picker
+            v-model="dialogEditRow.overTime"
+            type="datetime"
+            placeholder="选择日期时间">
+          </el-date-picker>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogEditFormVisible = false; dialogDestry('编辑')">取 消</el-button>
-        <el-button type="primary" :loading=isUpdateLoading @click="updateServerlistonline()">更新</el-button>
+        <el-button type="primary" :loading=isUpdateLoading @click="updateServerlist()">更新</el-button>
       </div>
     </el-dialog>
     <!-- add dialog、 -->
@@ -148,6 +155,7 @@ import { getServerlistonline,updateServerlistonline,addServerlistonline } from '
 export default {
   data() {
     return {
+      time: '',
       serverlist: [],
       host_path: "",
       file_name: "",
@@ -162,6 +170,7 @@ export default {
       //createForm
       dialogCreateFormVisible: false,
       isCreateLoading: false,
+      tmpRow: '',
       createForm: {
         id: "",
         sort: "",
@@ -198,11 +207,43 @@ export default {
           console.log(response);
       });
     },
+    clone(obj) {
+        var result = Array.isArray(obj) ? [] : {};
+        for (let key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                if (typeof obj[key] === 'object') {
+                    result[key] = this.clone(obj[key]);   //递归复制
+                } else {
+                    result[key] = obj[key];
+                }
+            }
+        }
+        return result;
+    },
+    toLocaleString( time ) {
+      if( time ) {
+        time = typeof time == 'string' ? time : time.toString();
+        if( time.length == 10 ) {
+          time = Number( time ) * 1000;
+        }
+        var cur_time = time ? new Date( time ) : new Date();
+        return new Date(cur_time).toISOString()
+      }
+      return null
+    },
     editServerlist(row){
-      this.dialogEditRow = row
+      this.tmpRow = row
+      if (!row["overTime"]) {
+        row["overTime"] = ''
+      }else{
+        row["overTime"] = this.toLocaleString(row["overTime"])
+      }
+      this.dialogEditRow = this.clone(row)
       this.dialogEditFormVisible = true
     },
-    updateServerlistonline() {
+    updateServerlist() {
+      this.dialogEditRow.overTime = new Date( this.dialogEditRow.overTime ).getTime()/1000
+      Object.assign( this.tmpRow, this.dialogEditRow)
       this.dialogEditFormVisible = false
     },
     addServerlistonline(){
@@ -242,7 +283,6 @@ export default {
         }
       })
     },
-
     dialogDestry(str){
       this.$message({
         type: 'info',
