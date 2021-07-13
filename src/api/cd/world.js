@@ -128,7 +128,13 @@ export function batchUpdateSecurityGroup(data) {
     data
   })
 }
-
+export function getWorldUrl(pk) {
+  return request({
+    url: '/api/world/url/',
+    method: 'get',
+    params: { id: pk }
+  })
+}
 export function getServerlistonline(cluster_name,version) {
   return request({
     url: '/api/world/serverlistonline/',

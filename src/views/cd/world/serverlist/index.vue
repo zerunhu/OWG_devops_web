@@ -101,7 +101,7 @@
     <el-dialog title="New ServerList" :visible.sync="dialogCreateFormVisible" width="40%" :closeOnClickModal=false :showClose=false>
       <el-form :model="createForm">
         <el-form-item label="Id" label-width="110px">
-          <el-input v-model="createForm.id" autocomplete="off" @input="createIdchange"></el-input>
+          <el-input v-model="createForm.id" autocomplete="off" @change="createIdchange"></el-input>
         </el-form-item>
         <el-form-item label="Name" label-width="110px">
           <el-input v-model="createForm.name" autocomplete="off"></el-input>
@@ -110,7 +110,7 @@
           <el-input v-model="createForm.port" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="Ip" label-width="110px">
-          <el-input v-model="createForm.ip" autocomplete="off"></el-input>
+          <el-input v-model="createForm.ip" autocomplete="off" :disabled="true"></el-input>
         </el-form-item>
         <el-form-item label="Sort" label-width="110px">
           <el-input v-model="createForm.sort" autocomplete="off" @change="valueIntSort"></el-input>
@@ -151,7 +151,7 @@
   </div>
 </template>
 <script>
-import { getServerlistonline,updateServerlistonline,addServerlistonline } from '@/api/cd/world'
+import { getServerlistonline,updateServerlistonline,getWorldUrl } from '@/api/cd/world'
 export default {
   data() {
     return {
@@ -176,10 +176,11 @@ export default {
         sort: "",
         state: "",
         name: "Planet #",
-        ip: "34.216.44.228",
+        ip: "填写Id字段后会自动从后台获取ip填充此字段",
         port: 10009,
         property: "",
         realstate: 1,
+        overTime: 0,
       },
     }
   },
@@ -289,9 +290,27 @@ export default {
         message: '已取消'+str
       });
     },
+
+    getWorldUrl(pk) {
+      console.log(pk)
+      getWorldUrl(pk)
+        .then(response => {
+          if (response.status == 200){
+            this.createForm.ip = response.msg
+          }else{
+            this.createForm.ip = ""
+            this.$message({
+              type: 'error',
+              message: response.msg
+            });
+          }
+      }, response => {
+          console.log(response);
+      });
+    },
     createIdchange(){
-      // this.createForm.port = parseInt(this.createForm.id) + 30000
       this.createForm.id =  parseInt(this.createForm.id)
+      this.getWorldUrl(this.createForm.id)
     },
     valueIntSort(){
       this.createForm.sort =  parseInt(this.createForm.sort)

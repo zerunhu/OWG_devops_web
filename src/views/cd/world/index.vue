@@ -410,7 +410,7 @@
             <div slot="tip" class="el-upload__tip" style="font-size:16px;margin-top:10px;">只能上传文件，且不超过500kb</div>
           </el-upload>
           <div style="margin-top:30px;float:right;margin-right:30px">
-            <el-button type="primary" :loading=serverlist.isServerlistLoading @click="clientSubmitUpload" :disabled="clientlist.disable">Update</el-button>
+            <el-button type="primary" :loading=clientlist.isLoading @click="clientSubmitUpload" :disabled="clientlist.disable">Update</el-button>
           </div>
         </el-tab-pane>
         <!-- notice  -->
